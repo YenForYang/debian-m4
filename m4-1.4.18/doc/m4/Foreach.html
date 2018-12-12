@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Foreach (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Foreach (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Foreach (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Conditionals.html#Conditionals" rel="up" title="Conditionals">
+<link href="Stacks.html#Stacks" rel="next" title="Stacks">
+<link href="Forloop.html#Forloop" rel="prev" title="Forloop">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Foreach"></a>
+<div class="header">
+<p>
+Next: <a href="Stacks.html#Stacks" accesskey="n" rel="next">Stacks</a>, Previous: <a href="Forloop.html#Forloop" accesskey="p" rel="prev">Forloop</a>, Up: <a href="Conditionals.html#Conditionals" accesskey="u" rel="up">Conditionals</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Iteration-by-list-contents"></a>
+<h3 class="section">6.5 Iteration by list contents</h3>
+
+<a name="index-for-each-loops"></a>
+<a name="index-loops_002c-list-iteration"></a>
+<a name="index-iterating-over-lists"></a>
+<p>Here is an example of a loop macro that implements list iteration.
+</p>
+<dl>
+<dt><a name="index-foreach"></a>Composite: <strong>foreach</strong> <em>(<var>iterator</var>, <var>paren-list</var>, <var>text</var>)</em></dt>
+<dt><a name="index-foreachq"></a>Composite: <strong>foreachq</strong> <em>(<var>iterator</var>, <var>quote-list</var>, <var>text</var>)</em></dt>
+<dd><p>Takes the name in <var>iterator</var>, which must be a valid macro name, and
+successively assign it each value from <var>paren-list</var> or
+<var>quote-list</var>.  In <code>foreach</code>, <var>paren-list</var> is a
+comma-separated list of elements contained in parentheses.  In
+<code>foreachq</code>, <var>quote-list</var> is a comma-separated list of elements
+contained in a quoted string.  For each assignment to <var>iterator</var>,
+append <var>text</var> to the overall expansion.  <var>text</var> may refer to
+<var>iterator</var>.  Any definition of <var>iterator</var> prior to this
+invocation is restored.
+</p></dd></dl>
+
+<p>As an example, this displays each word in a list inside of a sentence,
+using an implementation of <code>foreach</code> distributed as
+<samp>m4-1.4.18/examples/foreach.m4</samp>, and <code>foreachq</code>
+in <samp>m4-1.4.18/examples/foreachq.m4</samp>.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreach.m4')
+&rArr;
+foreach(`x', (foo, bar, foobar), `Word was: x
+')dnl
+&rArr;Word was: foo
+&rArr;Word was: bar
+&rArr;Word was: foobar
+include(`foreachq.m4')
+&rArr;
+foreachq(`x', `foo, bar, foobar', `Word was: x
+')dnl
+&rArr;Word was: foo
+&rArr;Word was: bar
+&rArr;Word was: foobar
+</pre></div>
+
+<p>It is possible to be more complex; each element of the <var>paren-list</var>
+or <var>quote-list</var> can itself be a list, to pass as further arguments
+to a helper macro.  This example generates a shell case statement:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreach.m4')
+&rArr;
+define(`_case', `  $1)
+    $2=&quot; $1&quot;;;
+')dnl
+define(`_cat', `$1$2')dnl
+case $`'1 in
+&rArr;case $1 in
+foreach(`x', `(`(`a', `vara')', `(`b', `varb')', `(`c', `varc')')',
+        `_cat(`_case', x)')dnl
+&rArr;  a)
+&rArr;    vara=&quot; a&quot;;;
+&rArr;  b)
+&rArr;    varb=&quot; b&quot;;;
+&rArr;  c)
+&rArr;    varc=&quot; c&quot;;;
+esac
+&rArr;esac
+</pre></div>
+
+<p>The implementation of the <code>foreach</code> macro is a bit more involved;
+it is a wrapper around two helper macros.  First, <code><span class="nolinebreak">_arg1</span><!-- /@w --></code> is
+needed to grab the first element of a list.  Second,
+<code><span class="nolinebreak">_foreach</span><!-- /@w --></code> implements the recursion, successively walking
+through the original list.  Here is a simple implementation of
+<code>foreach</code>:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+undivert(`foreach.m4')dnl
+&rArr;divert(`-1')
+&rArr;# foreach(x, (item_1, item_2, ..., item_n), stmt)
+&rArr;#   parenthesized list, simple version
+&rArr;define(`foreach', `pushdef(`$1')_foreach($@)popdef(`$1')')
+&rArr;define(`_arg1', `$1')
+&rArr;define(`_foreach', `ifelse(`$2', `()', `',
+&rArr;  `define(`$1', _arg1$2)$3`'$0(`$1', (shift$2), `$3')')')
+&rArr;divert`'dnl
+</pre></div>
+
+<p>Unfortunately, that implementation is not robust to macro names as list
+elements.  Each iteration of <code><span class="nolinebreak">_foreach</span><!-- /@w --></code> is stripping another
+layer of quotes, leading to erratic results if list elements are not
+already fully expanded.  The first cut at implementing <code>foreachq</code>
+takes this into account.  Also, when using quoted elements in a
+<var>paren-list</var>, the overall list must be quoted.  A <var>quote-list</var>
+has the nice property of requiring fewer characters to create a list
+containing the same quoted elements.  To see the difference between the
+two macros, we attempt to pass double-quoted macro names in a list,
+expecting the macro name on output after one layer of quotes is removed
+during list iteration and the final layer removed during the final
+rescan:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+define(`a', `1')define(`b', `2')define(`c', `3')
+&rArr;
+include(`foreach.m4')
+&rArr;
+include(`foreachq.m4')
+&rArr;
+foreach(`x', `(``a'', ``(b'', ``c)'')', `x
+')
+&rArr;1
+&rArr;(2)1
+&rArr;
+&rArr;, x
+&rArr;)
+foreachq(`x', ```a'', ``(b'', ``c)''', `x
+')dnl
+&rArr;a
+&rArr;(b
+&rArr;c)
+</pre></div>
+
+<p>Obviously, <code>foreachq</code> did a better job; here is its implementation:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+undivert(`foreachq.m4')dnl
+&rArr;include(`quote.m4')dnl
+&rArr;divert(`-1')
+&rArr;# foreachq(x, `item_1, item_2, ..., item_n', stmt)
+&rArr;#   quoted list, simple version
+&rArr;define(`foreachq', `pushdef(`$1')_foreachq($@)popdef(`$1')')
+&rArr;define(`_arg1', `$1')
+&rArr;define(`_foreachq', `ifelse(quote($2), `', `',
+&rArr;  `define(`$1', `_arg1($2)')$3`'$0(`$1', `shift($2)', `$3')')')
+&rArr;divert`'dnl
+</pre></div>
+
+<p>Notice that <code><span class="nolinebreak">_foreachq</span><!-- /@w --></code> had to use the helper macro
+<code>quote</code> defined earlier (see <a href="Shift.html#Shift">Shift</a>), to ensure that the
+embedded <code>ifelse</code> call does not go haywire if a list element
+contains a comma.  Unfortunately, this implementation of <code>foreachq</code>
+has its own severe flaw.  Whereas the <code>foreach</code> implementation was
+linear, this macro is quadratic in the number of list elements, and is
+much more likely to trip up the limit set by the command line option
+<samp>--nesting-limit</samp> (or <samp>-L</samp>, see <a href="Limits-control.html#Limits-control">Invoking m4</a>).  Additionally, this implementation does not expand
+&lsquo;<samp>defn(`<var>iterator</var>')</samp>&rsquo; very well, when compared with
+<code>foreach</code>.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreach.m4')include(`foreachq.m4')
+&rArr;
+foreach(`name', `(`a', `b')', ` defn(`name')')
+&rArr; a b
+foreachq(`name', ``a', `b'', ` defn(`name')')
+&rArr; _arg1(`a', `b') _arg1(shift(`a', `b'))
+</pre></div>
+
+<p>It is possible to have robust iteration with linear behavior and sane
+<var>iterator</var> contents for either list style.  See if you can learn
+from the best elements of both of these implementations to create robust
+macros (or see <a href="Improved-foreach.html#Improved-foreach">Answers</a>).
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Stacks.html#Stacks" accesskey="n" rel="next">Stacks</a>, Previous: <a href="Forloop.html#Forloop" accesskey="p" rel="prev">Forloop</a>, Up: <a href="Conditionals.html#Conditionals" accesskey="u" rel="up">Conditionals</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

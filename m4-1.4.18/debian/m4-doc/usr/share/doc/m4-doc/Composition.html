@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Composition (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Composition (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Composition (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Conditionals.html#Conditionals" rel="up" title="Conditionals">
+<link href="Debugging.html#Debugging" rel="next" title="Debugging">
+<link href="Stacks.html#Stacks" rel="prev" title="Stacks">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Composition"></a>
+<div class="header">
+<p>
+Previous: <a href="Stacks.html#Stacks" accesskey="p" rel="prev">Stacks</a>, Up: <a href="Conditionals.html#Conditionals" accesskey="u" rel="up">Conditionals</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Building-macros-with-macros"></a>
+<h3 class="section">6.7 Building macros with macros</h3>
+
+<a name="index-macro-composition"></a>
+<a name="index-composing-macros"></a>
+<p>Since m4 is a macro language, it is possible to write macros that
+can build other macros.  First on the list is a way to automate the
+creation of blind macros.
+</p>
+<a name="index-macro_002c-blind-2"></a>
+<a name="index-blind-macro-2"></a>
+<dl>
+<dt><a name="index-define_005fblind"></a>Composite: <strong>define_blind</strong> <em>(<var>name</var>, <span class="roman">[</span><var>value</var><span class="roman">]</span>)</em></dt>
+<dd><p>Defines <var>name</var> as a blind macro, such that <var>name</var> will expand to
+<var>value</var> only when given explicit arguments.  <var>value</var> should not
+be the result of <code>defn</code> (see <a href="Defn.html#Defn">Defn</a>).  This macro is only
+recognized with parameters, and results in an empty string.
+</p></dd></dl>
+
+<p>Defining a macro to define another macro can be a bit tricky.  We want
+to use a literal &lsquo;<samp>$#</samp>&rsquo; in the argument to the nested <code>define</code>.
+However, if &lsquo;<samp>$</samp>&rsquo; and &lsquo;<samp>#</samp>&rsquo; are adjacent in the definition of
+<code>define_blind</code>, then it would be expanded as the number of
+arguments to <code>define_blind</code> rather than the intended number of
+arguments to <var>name</var>.  The solution is to pass the difficult
+characters through extra arguments to a helper macro
+<code>_define_blind</code>.  When composing macros, it is a common idiom to
+need a helper macro to concatenate text that forms parameters in the
+composed macro, rather than interpreting the text as a parameter of the
+composing macro.
+</p>
+<p>As for the limitation against using <code>defn</code>, there are two reasons.
+If a macro was previously defined with <code>define_blind</code>, then it can
+safely be renamed to a new blind macro using plain <code>define</code>; using
+<code>define_blind</code> to rename it just adds another layer of
+<code>ifelse</code>, occupying memory and slowing down execution.  And if a
+macro is a builtin, then it would result in an attempt to define a macro
+consisting of both text and a builtin token; this is not supported, and
+the builtin token is flattened to an empty string.
+</p>
+<p>With that explanation, here&rsquo;s the definition, and some sample usage.
+Notice that <code>define_blind</code> is itself a blind macro.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -d</kbd>
+define(`define_blind', `ifelse(`$#', `0', ``$0'',
+`_$0(`$1', `$2', `$'`#', `$'`0')')')
+&rArr;
+define(`_define_blind', `define(`$1',
+`ifelse(`$3', `0', ``$4'', `$2')')')
+&rArr;
+define_blind
+&rArr;define_blind
+define_blind(`foo', `arguments were $*')
+&rArr;
+foo
+&rArr;foo
+foo(`bar')
+&rArr;arguments were bar
+define(`blah', defn(`foo'))
+&rArr;
+blah
+&rArr;blah
+blah(`a', `b')
+&rArr;arguments were a,b
+defn(`blah')
+&rArr;ifelse(`$#', `0', ``$0'', `arguments were $*')
+</pre></div>
+
+<a name="index-currying-arguments"></a>
+<a name="index-argument-currying"></a>
+<p>Another interesting composition tactic is argument <em>currying</em>, or
+factoring a macro that takes multiple arguments for use in a context
+that provides exactly one argument.
+</p>
+<dl>
+<dt><a name="index-curry"></a>Composite: <strong>curry</strong> <em>(<var>macro</var>, &hellip;)</em></dt>
+<dd><p>Expand to a macro call that takes exactly one argument, then appends
+that argument to the original arguments and invokes <var>macro</var> with the
+resulting list of arguments.
+</p></dd></dl>
+
+<p>A demonstration of currying makes the intent of this macro a little more
+obvious.  The macro <code>stack_foreach</code> mentioned earlier is an example
+of a context that provides exactly one argument to a macro name.  But
+coupled with currying, we can invoke <code>reverse</code> with two arguments
+for each definition of a macro stack.  This example uses the file
+<samp>m4-1.4.18/examples/curry.m4</samp> included in the
+distribution.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`curry.m4')include(`stack.m4')
+&rArr;
+define(`reverse', `ifelse(`$#', `0', , `$#', `1', ``$1'',
+                          `reverse(shift($@)), `$1'')')
+&rArr;
+pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
+&rArr;
+stack_foreach(`a', `:curry(`reverse', `4')')
+&rArr;:1, 4:2, 4:3, 4
+curry(`curry', `reverse', `1')(`2')(`3')
+&rArr;3, 2, 1
+</pre></div>
+
+<p>Now for the implementation.  Notice how <code>curry</code> leaves off with a
+macro name but no open parenthesis, while still in the middle of
+collecting arguments for &lsquo;<samp>$1</samp>&rsquo;.  The macro <code>_curry</code> is the
+helper macro that takes one argument, then adds it to the list and
+finally supplies the closing parenthesis.  The use of a comma inside the
+<code>shift</code> call allows currying to also work for a macro that takes
+one argument, although it often makes more sense to invoke that macro
+directly rather than going through <code>curry</code>.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+undivert(`curry.m4')dnl
+&rArr;divert(`-1')
+&rArr;# curry(macro, args)
+&rArr;# Expand to a macro call that takes one argument, then invoke
+&rArr;# macro(args, extra).
+&rArr;define(`curry', `$1(shift($@,)_$0')
+&rArr;define(`_curry', ``$1')')
+&rArr;divert`'dnl
+</pre></div>
+
+<p>Unfortunately, with M4 1.4.x, <code>curry</code> is unable to handle builtin
+tokens, which are silently flattened to the empty string when passed
+through another text macro.  This limitation will be lifted in a future
+release of M4.
+</p>
+<a name="index-renaming-macros-1"></a>
+<a name="index-copying-macros"></a>
+<a name="index-macros_002c-copying"></a>
+<p>Putting the last few concepts together, it is possible to copy or rename
+an entire stack of macro definitions.
+</p>
+<dl>
+<dt><a name="index-copy"></a>Composite: <strong>copy</strong> <em>(<var>source</var>, <var>dest</var>)</em></dt>
+<dt><a name="index-rename"></a>Composite: <strong>rename</strong> <em>(<var>source</var>, <var>dest</var>)</em></dt>
+<dd><p>Ensure that <var>dest</var> is undefined, then define it to the same stack of
+definitions currently in <var>source</var>.  <code>copy</code> leaves <var>source</var>
+unchanged, while <code>rename</code> undefines <var>source</var>.  There are only a
+few macros, such as <code>copy</code> or <code>defn</code>, which cannot be copied
+via this macro.
+</p></dd></dl>
+
+<p>The implementation is relatively straightforward (although since it uses
+<code>curry</code>, it is unable to copy builtin macros, such as the second
+definition of <code>a</code> as a synonym for <code>divnum</code>.  See if you can
+design a version that works around this limitation, or see <a href="Improved-copy.html#Improved-copy">Answers</a>).
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`curry.m4')include(`stack.m4')
+&rArr;
+define(`rename', `copy($@)undefine(`$1')')dnl
+define(`copy', `ifdef(`$2', `errprint(`$2 already defined
+')m4exit(`1')',
+   `stack_foreach(`$1', `curry(`pushdef', `$2')')')')dnl
+pushdef(`a', `1')pushdef(`a', defn(`divnum'))pushdef(`a', `2')
+&rArr;
+copy(`a', `b')
+&rArr;
+rename(`b', `c')
+&rArr;
+a b c
+&rArr;2 b 2
+popdef(`a', `c')c a
+&rArr; 0
+popdef(`a', `c')a c
+&rArr;1 1
+</pre></div>
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Stacks.html#Stacks" accesskey="p" rel="prev">Stacks</a>, Up: <a href="Conditionals.html#Conditionals" accesskey="u" rel="up">Conditionals</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

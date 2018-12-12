@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Improved copy (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Improved copy (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Improved copy (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Answers.html#Answers" rel="up" title="Answers">
+<link href="Improved-m4wrap.html#Improved-m4wrap" rel="next" title="Improved m4wrap">
+<link href="Improved-foreach.html#Improved-foreach" rel="prev" title="Improved foreach">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Improved-copy"></a>
+<div class="header">
+<p>
+Next: <a href="Improved-m4wrap.html#Improved-m4wrap" accesskey="n" rel="next">Improved m4wrap</a>, Previous: <a href="Improved-foreach.html#Improved-foreach" accesskey="p" rel="prev">Improved foreach</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Solution-for-copy"></a>
+<h3 class="section">17.4 Solution for <code>copy</code></h3>
+
+<p>The macro <code>copy</code> presented above
+is unable to handle builtin tokens with M4 1.4.x, because it tries to
+pass the builtin token through the macro <code>curry</code>, where it is
+silently flattened to an empty string (see <a href="Composition.html#Composition">Composition</a>).  Rather
+than using the problematic <code>curry</code> to work around the limitation
+that <code>stack_foreach</code> expects to invoke a macro that takes exactly
+one argument, we can write a new macro that lets us form the exact
+two-argument <code>pushdef</code> call sequence needed, so that we are no
+longer passing a builtin token through a text macro.
+</p>
+<dl>
+<dt><a name="index-stack_005fforeach_005fsep"></a>Composite: <strong>stack_foreach_sep</strong> <em>(<var>macro</var>, <var>pre</var>, <var>post</var>,   <var>sep</var>)</em></dt>
+<dt><a name="index-stack_005fforeach_005fsep_005flifo"></a>Composite: <strong>stack_foreach_sep_lifo</strong> <em>(<var>macro</var>, <var>pre</var>,   <var>post</var>, <var>sep</var>)</em></dt>
+<dd><p>For each of the <code>pushdef</code> definitions associated with <var>macro</var>,
+expand the sequence &lsquo;<samp><var>pre</var>`'definition`'<var>post</var></samp>&rsquo;.
+Additionally, expand <var>sep</var> between definitions.
+<code>stack_foreach_sep</code> visits the oldest definition first, while
+<code>stack_foreach_sep_lifo</code> visits the current definition first.  The
+expansion may dereference <var>macro</var>, but should not modify it.  There
+are a few special macros, such as <code>defn</code>, which cannot be used as
+the <var>macro</var> parameter.
+</p></dd></dl>
+
+<p>Note that <code>stack_foreach(`<var>macro</var>', `<var>action</var>')</code> is
+equivalent to <code>stack_foreach_sep(`<var>macro</var>', `<var>action</var>(',
+`)')</code>.  By supplying explicit parentheses, split among the <var>pre</var> and
+<var>post</var> arguments to <code>stack_foreach_sep</code>, it is now possible to
+construct macro calls with more than one argument, without passing
+builtin tokens through a macro call.  It is likewise possible to
+directly reference the stack definitions without a macro call, by
+leaving <var>pre</var> and <var>post</var> empty.  Thus, in addition to fixing
+<code>copy</code> on builtin tokens, it also executes with fewer macro
+invocations.
+</p>
+<p>The new macro also adds a separator that is only output after the first
+iteration of the helper <code>_stack_reverse_sep</code>, implemented by
+prepending the original <var>sep</var> to <var>pre</var> and omitting a <var>sep</var>
+argument in subsequent iterations.  Note that the empty string that
+separates <var>sep</var> from <var>pre</var> is provided as part of the fourth
+argument when originally calling <code>_stack_reverse_sep</code>, and not by
+writing <code>$4`'$3</code> as the third argument in the recursive call; while
+the other approach would give the same output, it does so at the expense
+of increasing the argument size on each iteration of
+<code>_stack_reverse_sep</code>, which results in quadratic instead of linear
+execution time.  The improved stack walking macros are available in
+<samp>m4-1.4.18/examples/stack_sep.m4</samp>:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`stack_sep.m4')
+&rArr;
+define(`copy', `ifdef(`$2', `errprint(`$2 already defined
+')m4exit(`1')',
+   `stack_foreach_sep(`$1', `pushdef(`$2',', `)')')')dnl
+pushdef(`a', `1')pushdef(`a', defn(`divnum'))
+&rArr;
+copy(`a', `b')
+&rArr;
+b
+&rArr;0
+popdef(`b')
+&rArr;
+b
+&rArr;1
+pushdef(`c', `1')pushdef(`c', `2')
+&rArr;
+stack_foreach_sep_lifo(`c', `', `', `, ')
+&rArr;2, 1
+undivert(`stack_sep.m4')dnl
+&rArr;divert(`-1')
+&rArr;# stack_foreach_sep(macro, pre, post, sep)
+&rArr;# Invoke PRE`'defn`'POST with a single argument of each definition
+&rArr;# from the definition stack of MACRO, starting with the oldest, and
+&rArr;# separated by SEP between definitions.
+&rArr;define(`stack_foreach_sep',
+&rArr;`_stack_reverse_sep(`$1', `tmp-$1')'dnl
+&rArr;`_stack_reverse_sep(`tmp-$1', `$1', `$2`'defn(`$1')$3', `$4`'')')
+&rArr;# stack_foreach_sep_lifo(macro, pre, post, sep)
+&rArr;# Like stack_foreach_sep, but starting with the newest definition.
+&rArr;define(`stack_foreach_sep_lifo',
+&rArr;`_stack_reverse_sep(`$1', `tmp-$1', `$2`'defn(`$1')$3', `$4`'')'dnl
+&rArr;`_stack_reverse_sep(`tmp-$1', `$1')')
+&rArr;define(`_stack_reverse_sep',
+&rArr;`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0(
+&rArr;  `$1', `$2', `$4$3')')')
+&rArr;divert`'dnl
+</pre></div>
+
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Improved-m4wrap.html#Improved-m4wrap" accesskey="n" rel="next">Improved m4wrap</a>, Previous: <a href="Improved-foreach.html#Improved-foreach" accesskey="p" rel="prev">Improved foreach</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

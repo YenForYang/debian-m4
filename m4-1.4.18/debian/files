@@ -1,0 +1,4 @@
+m4-dbgsym_1.4.18-2_amd64.deb debug optional automatic=yes
+m4-doc_1.4.18-2_all.deb doc optional
+m4_1.4.18-2_amd64.buildinfo interpreters optional
+m4_1.4.18-2_amd64.deb interpreters optional

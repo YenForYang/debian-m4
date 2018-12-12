@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Improved forloop (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Improved forloop (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Improved forloop (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Answers.html#Answers" rel="up" title="Answers">
+<link href="Improved-foreach.html#Improved-foreach" rel="next" title="Improved foreach">
+<link href="Improved-exch.html#Improved-exch" rel="prev" title="Improved exch">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Improved-forloop"></a>
+<div class="header">
+<p>
+Next: <a href="Improved-foreach.html#Improved-foreach" accesskey="n" rel="next">Improved foreach</a>, Previous: <a href="Improved-exch.html#Improved-exch" accesskey="p" rel="prev">Improved exch</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Solution-for-forloop"></a>
+<h3 class="section">17.2 Solution for <code>forloop</code></h3>
+
+<p>The <code>forloop</code> macro (see <a href="Forloop.html#Forloop">Forloop</a>) as presented earlier can go
+into an infinite loop if given an iterator that is not parsed as a macro
+name.  It does not do any sanity checking on its numeric bounds, and
+only permits decimal numbers for bounds.  Here is an improved version,
+shipped as <samp>m4-1.4.18/examples/forloop2.m4</samp>; this
+version also optimizes overhead by calling four macros instead of six
+per iteration (excluding those in <var>text</var>), by not dereferencing the
+<var>iterator</var> in the helper <code><span class="nolinebreak">_forloop</span><!-- /@w --></code>.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -d -I examples</kbd>
+undivert(`forloop2.m4')dnl
+&rArr;divert(`-1')
+&rArr;# forloop(var, from, to, stmt) - improved version:
+&rArr;#   works even if VAR is not a strict macro name
+&rArr;#   performs sanity check that FROM is larger than TO
+&rArr;#   allows complex numerical expressions in TO and FROM
+&rArr;define(`forloop', `ifelse(eval(`($2) &lt;= ($3)'), `1',
+&rArr;  `pushdef(`$1')_$0(`$1', eval(`$2'),
+&rArr;    eval(`$3'), `$4')popdef(`$1')')')
+&rArr;define(`_forloop',
+&rArr;  `define(`$1', `$2')$4`'ifelse(`$2', `$3', `',
+&rArr;    `$0(`$1', incr(`$2'), `$3', `$4')')')
+&rArr;divert`'dnl
+include(`forloop2.m4')
+&rArr;
+forloop(`i', `2', `1', `no iteration occurs')
+&rArr;
+forloop(`', `1', `2', ` odd iterator name')
+&rArr; odd iterator name odd iterator name
+forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
+&rArr; 0xa 0xb 0xc
+forloop(`i', `a', `b', `non-numeric bounds')
+error&rarr;m4:stdin:6: bad expression in eval (bad input): (a) &lt;= (b)
+&rArr;
+</pre></div>
+
+<p>One other change to notice is that the improved version used &lsquo;<samp>_$0</samp>&rsquo;
+rather than &lsquo;<samp>_foreach</samp>&rsquo; to invoke the helper routine.  In general,
+this is a good practice to follow, because then the set of macros can be
+uniformly transformed.  The following example shows a transformation
+that doubles the current quoting and appends a suffix &lsquo;<samp>2</samp>&rsquo; to each
+transformed macro.  If <code>foreach</code> refers to the literal
+&lsquo;<samp>_foreach</samp>&rsquo;, then <code>foreach2</code> invokes <code>_foreach</code> instead of
+the intended <code>_foreach2</code>, and the mixing of quoting paradigms leads
+to an infinite recursion loop in this example.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -d -L 9 -I examples</kbd>
+define(`arg1', `$1')include(`forloop2.m4')include(`quote.m4')
+&rArr;
+define(`double', `define(`$1'`2',
+  arg1(patsubst(dquote(defn(`$1')), `[`']', `\&amp;\&amp;')))')
+&rArr;
+double(`forloop')double(`_forloop')defn(`forloop2')
+&rArr;ifelse(eval(``($2) &lt;= ($3)''), ``1'',
+&rArr;  ``pushdef(``$1'')_$0(``$1'', eval(``$2''),
+&rArr;    eval(``$3''), ``$4'')popdef(``$1'')'')
+forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
+&rArr;
+changequote(`[', `]')changequote([``], [''])
+&rArr;
+forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
+&rArr;
+changequote`'include(`forloop.m4')
+&rArr;
+double(`forloop')double(`_forloop')defn(`forloop2')
+&rArr;pushdef(``$1'', ``$2'')_forloop($@)popdef(``$1'')
+forloop(i, 1, 5, `ifelse(')forloop(i, 1, 5, `)')
+&rArr;
+changequote(`[', `]')changequote([``], [''])
+&rArr;
+forloop2(i, 1, 5, ``ifelse('')forloop2(i, 1, 5, ``)'')
+error&rarr;m4:stdin:12: recursion limit of 9 exceeded, use -L&lt;N&gt; to change it
+</pre></div>
+
+<p>One more optimization is still possible.  Instead of repeatedly
+assigning a variable then invoking or dereferencing it, it is possible
+to pass the current iterator value as a single argument.  Coupled with
+<code>curry</code> if other arguments are needed (see <a href="Composition.html#Composition">Composition</a>), or
+with helper macros if the argument is needed in more than one place in
+the expansion, the output can be generated with three, rather than four,
+macros of overhead per iteration.  Notice how the file
+<samp>m4-1.4.18/examples/forloop3.m4</samp> rearranges the
+arguments of the helper <code>_forloop</code> to take two arguments that are
+placed around the current value.  By splitting a balanced set of
+parantheses across multiple arguments, the helper macro can now be
+shared by <code>forloop</code> and the new <code>forloop_arg</code>.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`forloop3.m4')
+&rArr;
+undivert(`forloop3.m4')dnl
+&rArr;divert(`-1')
+&rArr;# forloop_arg(from, to, macro) - invoke MACRO(value) for
+&rArr;#   each value between FROM and TO, without define overhead
+&rArr;define(`forloop_arg', `ifelse(eval(`($1) &lt;= ($2)'), `1',
+&rArr;  `_forloop(`$1', eval(`$2'), `$3(', `)')')')
+&rArr;# forloop(var, from, to, stmt) - refactored to share code
+&rArr;define(`forloop', `ifelse(eval(`($2) &lt;= ($3)'), `1',
+&rArr;  `pushdef(`$1')_forloop(eval(`$2'), eval(`$3'),
+&rArr;    `define(`$1',', `)$4')popdef(`$1')')')
+&rArr;define(`_forloop',
+&rArr;  `$3`$1'$4`'ifelse(`$1', `$2', `',
+&rArr;    `$0(incr(`$1'), `$2', `$3', `$4')')')
+&rArr;divert`'dnl
+forloop(`i', `1', `3', ` i')
+&rArr; 1 2 3
+define(`echo', `$@')
+&rArr;
+forloop_arg(`1', `3', ` echo')
+&rArr; 1 2 3
+include(`curry.m4')
+&rArr;
+forloop_arg(`1', `3', `curry(`pushdef', `a')')
+&rArr;
+a
+&rArr;3
+popdef(`a')a
+&rArr;2
+popdef(`a')a
+&rArr;1
+popdef(`a')a
+&rArr;a
+</pre></div>
+
+<p>Of course, it is possible to make even more improvements, such as
+adding an optional step argument, or allowing iteration through
+descending sequences.  GNU Autoconf provides some of these
+additional bells and whistles in its <code>m4_for</code> macro.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Improved-foreach.html#Improved-foreach" accesskey="n" rel="next">Improved foreach</a>, Previous: <a href="Improved-exch.html#Improved-exch" accesskey="p" rel="prev">Improved exch</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

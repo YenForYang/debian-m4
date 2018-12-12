@@ -1,0 +1,602 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Top (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Top (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Top (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="../dir/index.html" rel="up" title="(dir)">
+<link href="Preliminaries.html#Preliminaries" rel="next" title="Preliminaries">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<h1 class="settitle" align="center">GNU M4 1.4.18 macro processor</h1>
+
+
+
+
+
+
+
+
+<a name="SEC_Contents"></a>
+<h2 class="contents-heading">Table of Contents</h2>
+
+<div class="contents">
+
+<ul class="no-bullet">
+  <li><a name="toc-Introduction-and-preliminaries" href="Preliminaries.html#Preliminaries">1 Introduction and preliminaries</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Introduction-to-m4" href="Intro.html#Intro">1.1 Introduction to <code>m4</code></a></li>
+    <li><a name="toc-Historical-references" href="History.html#History">1.2 Historical references</a></li>
+    <li><a name="toc-Problems-and-bugs" href="Bugs.html#Bugs">1.3 Problems and bugs</a></li>
+    <li><a name="toc-Using-this-manual" href="Manual.html#Manual">1.4 Using this manual</a></li>
+  </ul></li>
+  <li><a name="toc-Invoking-m4-1" href="Invoking-m4.html#Invoking-m4">2 Invoking <code>m4</code></a>
+  <ul class="no-bullet">
+    <li><a name="toc-Command-line-options-for-operation-modes" href="Operation-modes.html#Operation-modes">2.1 Command line options for operation modes</a></li>
+    <li><a name="toc-Command-line-options-for-preprocessor-features" href="Preprocessor-features.html#Preprocessor-features">2.2 Command line options for preprocessor features</a></li>
+    <li><a name="toc-Command-line-options-for-limits-control" href="Limits-control.html#Limits-control">2.3 Command line options for limits control</a></li>
+    <li><a name="toc-Command-line-options-for-frozen-state" href="Frozen-state.html#Frozen-state">2.4 Command line options for frozen state</a></li>
+    <li><a name="toc-Command-line-options-for-debugging" href="Debugging-options.html#Debugging-options">2.5 Command line options for debugging</a></li>
+    <li><a name="toc-Specifying-input-files-on-the-command-line" href="Command-line-files.html#Command-line-files">2.6 Specifying input files on the command line</a></li>
+  </ul></li>
+  <li><a name="toc-Lexical-and-syntactic-conventions" href="Syntax.html#Syntax">3 Lexical and syntactic conventions</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Macro-names" href="Names.html#Names">3.1 Macro names</a></li>
+    <li><a name="toc-Quoting-input-to-m4" href="Quoted-strings.html#Quoted-strings">3.2 Quoting input to <code>m4</code></a></li>
+    <li><a name="toc-Comments-in-m4-input" href="Comments.html#Comments">3.3 Comments in <code>m4</code> input</a></li>
+    <li><a name="toc-Other-kinds-of-input-tokens" href="Other-tokens.html#Other-tokens">3.4 Other kinds of input tokens</a></li>
+    <li><a name="toc-How-m4-copies-input-to-output" href="Input-processing.html#Input-processing">3.5 How <code>m4</code> copies input to output</a></li>
+  </ul></li>
+  <li><a name="toc-How-to-invoke-macros" href="Macros.html#Macros">4 How to invoke macros</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Macro-invocation" href="Invocation.html#Invocation">4.1 Macro invocation</a></li>
+    <li><a name="toc-Preventing-macro-invocation" href="Inhibiting-Invocation.html#Inhibiting-Invocation">4.2 Preventing macro invocation</a></li>
+    <li><a name="toc-Macro-arguments" href="Macro-Arguments.html#Macro-Arguments">4.3 Macro arguments</a></li>
+    <li><a name="toc-On-Quoting-Arguments-to-macros" href="Quoting-Arguments.html#Quoting-Arguments">4.4 On Quoting Arguments to macros</a></li>
+    <li><a name="toc-Macro-expansion-1" href="Macro-expansion.html#Macro-expansion">4.5 Macro expansion</a></li>
+  </ul></li>
+  <li><a name="toc-How-to-define-new-macros" href="Definitions.html#Definitions">5 How to define new macros</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Defining-a-macro" href="Define.html#Define">5.1 Defining a macro</a></li>
+    <li><a name="toc-Arguments-to-macros" href="Arguments.html#Arguments">5.2 Arguments to macros</a></li>
+    <li><a name="toc-Special-arguments-to-macros" href="Pseudo-Arguments.html#Pseudo-Arguments">5.3 Special arguments to macros</a></li>
+    <li><a name="toc-Deleting-a-macro" href="Undefine.html#Undefine">5.4 Deleting a macro</a></li>
+    <li><a name="toc-Renaming-macros" href="Defn.html#Defn">5.5 Renaming macros</a></li>
+    <li><a name="toc-Temporarily-redefining-macros" href="Pushdef.html#Pushdef">5.6 Temporarily redefining macros</a></li>
+    <li><a name="toc-Indirect-call-of-macros" href="Indir.html#Indir">5.7 Indirect call of macros</a></li>
+    <li><a name="toc-Indirect-call-of-builtins" href="Builtin.html#Builtin">5.8 Indirect call of builtins</a></li>
+  </ul></li>
+  <li><a name="toc-Conditionals_002c-loops_002c-and-recursion" href="Conditionals.html#Conditionals">6 Conditionals, loops, and recursion</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Testing-if-a-macro-is-defined" href="Ifdef.html#Ifdef">6.1 Testing if a macro is defined</a></li>
+    <li><a name="toc-If_002delse-construct_002c-or-multibranch" href="Ifelse.html#Ifelse">6.2 If-else construct, or multibranch</a></li>
+    <li><a name="toc-Recursion-in-m4" href="Shift.html#Shift">6.3 Recursion in <code>m4</code></a></li>
+    <li><a name="toc-Iteration-by-counting" href="Forloop.html#Forloop">6.4 Iteration by counting</a></li>
+    <li><a name="toc-Iteration-by-list-contents" href="Foreach.html#Foreach">6.5 Iteration by list contents</a></li>
+    <li><a name="toc-Working-with-definition-stacks" href="Stacks.html#Stacks">6.6 Working with definition stacks</a></li>
+    <li><a name="toc-Building-macros-with-macros" href="Composition.html#Composition">6.7 Building macros with macros</a></li>
+  </ul></li>
+  <li><a name="toc-How-to-debug-macros-and-input" href="Debugging.html#Debugging">7 How to debug macros and input</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Displaying-macro-definitions" href="Dumpdef.html#Dumpdef">7.1 Displaying macro definitions</a></li>
+    <li><a name="toc-Tracing-macro-calls" href="Trace.html#Trace">7.2 Tracing macro calls</a></li>
+    <li><a name="toc-Controlling-debugging-output" href="Debug-Levels.html#Debug-Levels">7.3 Controlling debugging output</a></li>
+    <li><a name="toc-Saving-debugging-output" href="Debug-Output.html#Debug-Output">7.4 Saving debugging output</a></li>
+  </ul></li>
+  <li><a name="toc-Input-control" href="Input-Control.html#Input-Control">8 Input control</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Deleting-whitespace-in-input" href="Dnl.html#Dnl">8.1 Deleting whitespace in input</a></li>
+    <li><a name="toc-Changing-the-quote-characters" href="Changequote.html#Changequote">8.2 Changing the quote characters</a></li>
+    <li><a name="toc-Changing-the-comment-delimiters" href="Changecom.html#Changecom">8.3 Changing the comment delimiters</a></li>
+    <li><a name="toc-Changing-the-lexical-structure-of-words" href="Changeword.html#Changeword">8.4 Changing the lexical structure of words</a></li>
+    <li><a name="toc-Saving-text-until-end-of-input" href="M4wrap.html#M4wrap">8.5 Saving text until end of input</a></li>
+  </ul></li>
+  <li><a name="toc-File-inclusion" href="File-Inclusion.html#File-Inclusion">9 File inclusion</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Including-named-files" href="Include.html#Include">9.1 Including named files</a></li>
+    <li><a name="toc-Searching-for-include-files" href="Search-Path.html#Search-Path">9.2 Searching for include files</a></li>
+  </ul></li>
+  <li><a name="toc-Diverting-and-undiverting-output" href="Diversions.html#Diversions">10 Diverting and undiverting output</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Diverting-output" href="Divert.html#Divert">10.1 Diverting output</a></li>
+    <li><a name="toc-Undiverting-output" href="Undivert.html#Undivert">10.2 Undiverting output</a></li>
+    <li><a name="toc-Diversion-numbers" href="Divnum.html#Divnum">10.3 Diversion numbers</a></li>
+    <li><a name="toc-Discarding-diverted-text" href="Cleardivert.html#Cleardivert">10.4 Discarding diverted text</a></li>
+  </ul></li>
+  <li><a name="toc-Macros-for-text-handling" href="Text-handling.html#Text-handling">11 Macros for text handling</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Calculating-length-of-strings" href="Len.html#Len">11.1 Calculating length of strings</a></li>
+    <li><a name="toc-Searching-for-substrings" href="Index-macro.html#Index-macro">11.2 Searching for substrings</a></li>
+    <li><a name="toc-Searching-for-regular-expressions" href="Regexp.html#Regexp">11.3 Searching for regular expressions</a></li>
+    <li><a name="toc-Extracting-substrings" href="Substr.html#Substr">11.4 Extracting substrings</a></li>
+    <li><a name="toc-Translating-characters" href="Translit.html#Translit">11.5 Translating characters</a></li>
+    <li><a name="toc-Substituting-text-by-regular-expression" href="Patsubst.html#Patsubst">11.6 Substituting text by regular expression</a></li>
+    <li><a name="toc-Formatting-strings-_0028printf_002dlike_0029" href="Format.html#Format">11.7 Formatting strings (printf-like)</a></li>
+  </ul></li>
+  <li><a name="toc-Macros-for-doing-arithmetic" href="Arithmetic.html#Arithmetic">12 Macros for doing arithmetic</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Decrement-and-increment-operators" href="Incr.html#Incr">12.1 Decrement and increment operators</a></li>
+    <li><a name="toc-Evaluating-integer-expressions" href="Eval.html#Eval">12.2 Evaluating integer expressions</a></li>
+  </ul></li>
+  <li><a name="toc-Macros-for-running-shell-commands" href="Shell-commands.html#Shell-commands">13 Macros for running shell commands</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Determining-the-platform" href="Platform-macros.html#Platform-macros">13.1 Determining the platform</a></li>
+    <li><a name="toc-Executing-simple-commands" href="Syscmd.html#Syscmd">13.2 Executing simple commands</a></li>
+    <li><a name="toc-Reading-the-output-of-commands" href="Esyscmd.html#Esyscmd">13.3 Reading the output of commands</a></li>
+    <li><a name="toc-Exit-status" href="Sysval.html#Sysval">13.4 Exit status</a></li>
+    <li><a name="toc-Making-temporary-files" href="Mkstemp.html#Mkstemp">13.5 Making temporary files</a></li>
+  </ul></li>
+  <li><a name="toc-Miscellaneous-builtin-macros" href="Miscellaneous.html#Miscellaneous">14 Miscellaneous builtin macros</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Printing-error-messages" href="Errprint.html#Errprint">14.1 Printing error messages</a></li>
+    <li><a name="toc-Printing-current-location" href="Location.html#Location">14.2 Printing current location</a></li>
+    <li><a name="toc-Exiting-from-m4" href="M4exit.html#M4exit">14.3 Exiting from <code>m4</code></a></li>
+  </ul></li>
+  <li><a name="toc-Fast-loading-of-frozen-state" href="Frozen-files.html#Frozen-files">15 Fast loading of frozen state</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Using-frozen-files-1" href="Using-frozen-files.html#Using-frozen-files">15.1 Using frozen files</a></li>
+    <li><a name="toc-Frozen-file-format-1" href="Frozen-file-format.html#Frozen-file-format">15.2 Frozen file format</a></li>
+  </ul></li>
+  <li><a name="toc-Compatibility-with-other-versions-of-m4" href="Compatibility.html#Compatibility">16 Compatibility with other versions of <code>m4</code></a>
+  <ul class="no-bullet">
+    <li><a name="toc-Extensions-in-GNU-M4" href="Extensions.html#Extensions">16.1 Extensions in GNU M4</a></li>
+    <li><a name="toc-Facilities-in-System-V-m4-not-in-GNU-m4" href="Incompatibilities.html#Incompatibilities">16.2 Facilities in System V <code>m4</code> not in GNU <code>m4</code></a></li>
+    <li><a name="toc-Other-incompatibilities" href="Other-Incompatibilities.html#Other-Incompatibilities">16.3 Other incompatibilities</a></li>
+  </ul></li>
+  <li><a name="toc-Correct-version-of-some-examples" href="Answers.html#Answers">17 Correct version of some examples</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Solution-for-exch" href="Improved-exch.html#Improved-exch">17.1 Solution for <code>exch</code></a></li>
+    <li><a name="toc-Solution-for-forloop" href="Improved-forloop.html#Improved-forloop">17.2 Solution for <code>forloop</code></a></li>
+    <li><a name="toc-Solution-for-foreach" href="Improved-foreach.html#Improved-foreach">17.3 Solution for <code>foreach</code></a></li>
+    <li><a name="toc-Solution-for-copy" href="Improved-copy.html#Improved-copy">17.4 Solution for <code>copy</code></a></li>
+    <li><a name="toc-Solution-for-m4wrap" href="Improved-m4wrap.html#Improved-m4wrap">17.5 Solution for <code>m4wrap</code></a></li>
+    <li><a name="toc-Solution-for-cleardivert" href="Improved-cleardivert.html#Improved-cleardivert">17.6 Solution for <code>cleardivert</code></a></li>
+    <li><a name="toc-Solution-for-capitalize" href="Improved-capitalize.html#Improved-capitalize">17.7 Solution for <code>capitalize</code></a></li>
+    <li><a name="toc-Solution-for-fatal_005ferror" href="Improved-fatal_005ferror.html#Improved-fatal_005ferror">17.8 Solution for <code>fatal_error</code></a></li>
+  </ul></li>
+  <li><a name="toc-How-to-make-copies-of-the-overall-M4-package" href="Copying-This-Package.html#Copying-This-Package">Appendix A How to make copies of the overall M4 package</a>
+  <ul class="no-bullet">
+    <li><a name="toc-License-for-copying-the-M4-package" href="GNU-General-Public-License.html#GNU-General-Public-License">A.1 License for copying the M4 package</a></li>
+  </ul></li>
+  <li><a name="toc-How-to-make-copies-of-this-manual" href="Copying-This-Manual.html#Copying-This-Manual">Appendix B How to make copies of this manual</a>
+  <ul class="no-bullet">
+    <li><a name="toc-License-for-copying-this-manual" href="GNU-Free-Documentation-License.html#GNU-Free-Documentation-License">B.1 License for copying this manual</a></li>
+  </ul></li>
+  <li><a name="toc-Indices-of-concepts-and-macros" href="Indices.html#Indices">Appendix C Indices of concepts and macros</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Index-for-all-m4-macros" href="Macro-index.html#Macro-index">C.1 Index for all <code>m4</code> macros</a></li>
+    <li><a name="toc-Index-for-many-concepts" href="Concept-index.html#Concept-index">C.2 Index for many concepts</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+<a name="Top"></a>
+<div class="header">
+<p>
+Next: <a href="Preliminaries.html#Preliminaries" accesskey="n" rel="next">Preliminaries</a>, Up: <a href="../dir/index.html" accesskey="u" rel="up">(dir)</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="GNU-M4"></a>
+<h1 class="top">GNU M4</h1>
+
+<p>This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+</p>
+<p>Copyright &copy; 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+</p>
+<blockquote>
+<p>Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled &ldquo;GNU Free Documentation License.&rdquo;
+</p></blockquote>
+
+
+<p>GNU <code>m4</code> is an implementation of the traditional UNIX macro
+processor.  It is mostly SVR4 compatible, although it has some
+extensions (for example, handling more than 9 positional parameters
+to macros).  <code>m4</code> also has builtin functions for including
+files, running shell commands, doing arithmetic, etc.  Autoconf needs
+GNU <code>m4</code> for generating <samp>configure</samp> scripts, but not for
+running them.
+</p>
+<p>GNU <code>m4</code> was originally written by Ren&eacute; Seindal, with
+subsequent changes by Fran&ccedil;ois Pinard and other volunteers
+on the Internet.  All names and email addresses can be found in the
+files <samp>m4-1.4.18/AUTHORS</samp> and
+<samp>m4-1.4.18/THANKS</samp> from the GNU M4
+distribution.
+</p>
+<p>This is release 1.4.18.  It is now considered stable:  future
+releases in the 1.4.x series are only meant to fix bugs, increase speed,
+or improve documentation.  However&hellip;
+</p>
+<p>An experimental feature, which would improve <code>m4</code> usefulness,
+allows for changing the syntax for what is a <em>word</em> in <code>m4</code>.
+You should use:
+</p><div class="example">
+<pre class="example">./configure --enable-changeword
+</pre></div>
+<p>if you want this feature compiled in.  The current implementation
+slows down <code>m4</code> considerably and is hardly acceptable.  In the
+future, <code>m4</code> 2.0 will come with a different set of new features
+that provide similar capabilities, but without the inefficiencies, so
+changeword will go away and <em>you should not count on it</em>.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Preliminaries.html#Preliminaries" accesskey="1">Preliminaries</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Introduction and preliminaries
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Invoking-m4.html#Invoking-m4" accesskey="2">Invoking m4</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Invoking <code>m4</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Syntax.html#Syntax" accesskey="3">Syntax</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Lexical and syntactic conventions
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Macros.html#Macros" accesskey="4">Macros</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to invoke macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Definitions.html#Definitions" accesskey="5">Definitions</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to define new macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Conditionals.html#Conditionals" accesskey="6">Conditionals</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Conditionals, loops, and recursion
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Debugging.html#Debugging" accesskey="7">Debugging</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to debug macros and input
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Input-Control.html#Input-Control" accesskey="8">Input Control</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Input control
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="File-Inclusion.html#File-Inclusion" accesskey="9">File Inclusion</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">File inclusion
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Diversions.html#Diversions">Diversions</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Diverting and undiverting output
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Text-handling.html#Text-handling">Text handling</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Macros for text handling
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Arithmetic.html#Arithmetic">Arithmetic</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Macros for doing arithmetic
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Shell-commands.html#Shell-commands">Shell commands</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Macros for running shell commands
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Miscellaneous.html#Miscellaneous">Miscellaneous</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Miscellaneous builtin macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Frozen-files.html#Frozen-files">Frozen files</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Fast loading of frozen state
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Compatibility.html#Compatibility">Compatibility</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Compatibility with other versions of <code>m4</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Answers.html#Answers">Answers</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Correct version of some examples
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Copying-This-Package.html#Copying-This-Package">Copying This Package</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to make copies of the overall M4 package
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Copying-This-Manual.html#Copying-This-Manual">Copying This Manual</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to make copies of this manual
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Indices.html#Indices">Indices</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Indices of concepts and macros
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><th colspan="3" align="left" valign="top"><pre class="menu-comment"> &mdash; The Detailed Node Listing &mdash;
+
+Introduction and preliminaries
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Intro.html#Intro">Intro</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Introduction to <code>m4</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="History.html#History">History</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Historical references
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Bugs.html#Bugs">Bugs</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Problems and bugs
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Manual.html#Manual">Manual</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Using this manual
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Invoking <code>m4</code>
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Operation-modes.html#Operation-modes">Operation modes</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Command line options for operation modes
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Preprocessor-features.html#Preprocessor-features">Preprocessor features</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Command line options for preprocessor features
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Limits-control.html#Limits-control">Limits control</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Command line options for limits control
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Frozen-state.html#Frozen-state">Frozen state</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Command line options for frozen state
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Debugging-options.html#Debugging-options">Debugging options</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Command line options for debugging
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Command-line-files.html#Command-line-files">Command line files</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Specifying input files on the command line
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Lexical and syntactic conventions
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Names.html#Names">Names</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Macro names
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Quoted-strings.html#Quoted-strings">Quoted strings</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Quoting input to <code>m4</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Comments.html#Comments">Comments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Comments in <code>m4</code> input
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Other-tokens.html#Other-tokens">Other tokens</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Other kinds of input tokens
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Input-processing.html#Input-processing">Input processing</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How <code>m4</code> copies input to output
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+How to invoke macros
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Invocation.html#Invocation">Invocation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Macro invocation
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Inhibiting-Invocation.html#Inhibiting-Invocation">Inhibiting Invocation</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Preventing macro invocation
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Macro-Arguments.html#Macro-Arguments">Macro Arguments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Macro arguments
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Quoting-Arguments.html#Quoting-Arguments">Quoting Arguments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">On Quoting Arguments to macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Macro-expansion.html#Macro-expansion">Macro expansion</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Expanding macros
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+How to define new macros
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Define.html#Define">Define</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Defining a new macro
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Arguments.html#Arguments">Arguments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Arguments to macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Pseudo-Arguments.html#Pseudo-Arguments">Pseudo Arguments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Special arguments to macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Undefine.html#Undefine">Undefine</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Deleting a macro
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Defn.html#Defn">Defn</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Renaming macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Pushdef.html#Pushdef">Pushdef</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Temporarily redefining macros
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Indir.html#Indir">Indir</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Indirect call of macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Builtin.html#Builtin">Builtin</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Indirect call of builtins
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Conditionals, loops, and recursion
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Ifdef.html#Ifdef">Ifdef</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Testing if a macro is defined
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Ifelse.html#Ifelse">Ifelse</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">If-else construct, or multibranch
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Shift.html#Shift">Shift</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Recursion in <code>m4</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Forloop.html#Forloop">Forloop</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Iteration by counting
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Foreach.html#Foreach">Foreach</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Iteration by list contents
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Stacks.html#Stacks">Stacks</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Working with definition stacks
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Composition.html#Composition">Composition</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Building macros with macros
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+How to debug macros and input
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Dumpdef.html#Dumpdef">Dumpdef</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Displaying macro definitions
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Trace.html#Trace">Trace</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Tracing macro calls
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Debug-Levels.html#Debug-Levels">Debug Levels</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Controlling debugging output
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Debug-Output.html#Debug-Output">Debug Output</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Saving debugging output
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Input control
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Dnl.html#Dnl">Dnl</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Deleting whitespace in input
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Changequote.html#Changequote">Changequote</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Changing the quote characters
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Changecom.html#Changecom">Changecom</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Changing the comment delimiters
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Changeword.html#Changeword">Changeword</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Changing the lexical structure of words
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="M4wrap.html#M4wrap">M4wrap</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Saving text until end of input
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+File inclusion
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Include.html#Include">Include</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Including named files
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Search-Path.html#Search-Path">Search Path</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Searching for include files
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Diverting and undiverting output
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Divert.html#Divert">Divert</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Diverting output
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Undivert.html#Undivert">Undivert</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Undiverting output
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Divnum.html#Divnum">Divnum</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Diversion numbers
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Cleardivert.html#Cleardivert">Cleardivert</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Discarding diverted text
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Macros for text handling
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Len.html#Len">Len</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Calculating length of strings
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Index-macro.html#Index-macro">Index macro</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Searching for substrings
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Regexp.html#Regexp">Regexp</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Searching for regular expressions
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Substr.html#Substr">Substr</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Extracting substrings
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Translit.html#Translit">Translit</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Translating characters
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Patsubst.html#Patsubst">Patsubst</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Substituting text by regular expression
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Format.html#Format">Format</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Formatting strings (printf-like)
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Macros for doing arithmetic
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Incr.html#Incr">Incr</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Decrement and increment operators
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Eval.html#Eval">Eval</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Evaluating integer expressions
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Macros for running shell commands
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Platform-macros.html#Platform-macros">Platform macros</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Determining the platform
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Syscmd.html#Syscmd">Syscmd</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Executing simple commands
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Esyscmd.html#Esyscmd">Esyscmd</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Reading the output of commands
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sysval.html#Sysval">Sysval</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Exit status
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Mkstemp.html#Mkstemp">Mkstemp</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Making temporary files
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Miscellaneous builtin macros
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Errprint.html#Errprint">Errprint</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Printing error messages
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Location.html#Location">Location</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Printing current location
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="M4exit.html#M4exit">M4exit</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Exiting from <code>m4</code>
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Fast loading of frozen state
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Using-frozen-files.html#Using-frozen-files">Using frozen files</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Using frozen files
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Frozen-file-format.html#Frozen-file-format">Frozen file format</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Frozen file format
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Compatibility with other versions of <code>m4</code>
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Extensions.html#Extensions">Extensions</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Extensions in GNU M4
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Incompatibilities.html#Incompatibilities">Incompatibilities</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Facilities in System V m4 not in GNU M4
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Other-Incompatibilities.html#Other-Incompatibilities">Other Incompatibilities</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Other incompatibilities
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Correct version of some examples
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Improved-exch.html#Improved-exch">Improved exch</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Solution for <code>exch</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Improved-forloop.html#Improved-forloop">Improved forloop</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Solution for <code>forloop</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Improved-foreach.html#Improved-foreach">Improved foreach</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Solution for <code>foreach</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Improved-copy.html#Improved-copy">Improved copy</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Solution for <code>copy</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Improved-m4wrap.html#Improved-m4wrap">Improved m4wrap</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Solution for <code>m4wrap</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Improved-cleardivert.html#Improved-cleardivert">Improved cleardivert</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Solution for <code>cleardivert</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Improved-capitalize.html#Improved-capitalize">Improved capitalize</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Solution for <code>capitalize</code>
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Improved-fatal_005ferror.html#Improved-fatal_005ferror">Improved fatal_error</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Solution for <code>fatal_error</code>
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+How to make copies of the overall M4 package
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="GNU-General-Public-License.html#GNU-General-Public-License">GNU General Public License</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">License for copying the M4 package
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+How to make copies of this manual
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="GNU-Free-Documentation-License.html#GNU-Free-Documentation-License">GNU Free Documentation License</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">License for copying this manual
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Indices of concepts and macros
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="Macro-index.html#Macro-index">Macro index</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Index for all <code>m4</code> macros
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Concept-index.html#Concept-index">Concept index</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Index for many concepts
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr></table>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Preliminaries.html#Preliminaries" accesskey="n" rel="next">Preliminaries</a>, Up: <a href="../dir/index.html" accesskey="u" rel="up">(dir)</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

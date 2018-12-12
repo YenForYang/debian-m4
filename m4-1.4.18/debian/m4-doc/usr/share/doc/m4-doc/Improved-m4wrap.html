@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Improved m4wrap (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Improved m4wrap (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Improved m4wrap (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Answers.html#Answers" rel="up" title="Answers">
+<link href="Improved-cleardivert.html#Improved-cleardivert" rel="next" title="Improved cleardivert">
+<link href="Improved-copy.html#Improved-copy" rel="prev" title="Improved copy">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Improved-m4wrap"></a>
+<div class="header">
+<p>
+Next: <a href="Improved-cleardivert.html#Improved-cleardivert" accesskey="n" rel="next">Improved cleardivert</a>, Previous: <a href="Improved-copy.html#Improved-copy" accesskey="p" rel="prev">Improved copy</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Solution-for-m4wrap"></a>
+<h3 class="section">17.5 Solution for <code>m4wrap</code></h3>
+
+<p>The replacement <code>m4wrap</code> versions presented above, designed to
+guarantee FIFO or LIFO order regardless of the underlying M4
+implementation, share a bug when dealing with wrapped text that looks
+like parameter expansion.  Note how the invocation of
+<code>m4wrap<var>n</var></code> interprets these parameters, while using the
+builtin preserves them for their intended use.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`wraplifo.m4')
+&rArr;
+m4wrap(`define(`foo', ``$0:'-$1-$*-$#-')foo(`a', `b')
+')
+&rArr;
+builtin(`m4wrap', ``'define(`bar', ``$0:'-$1-$*-$#-')bar(`a', `b')
+')
+&rArr;
+^D
+&rArr;bar:-a-a,b-2-
+&rArr;m4wrap0:---0-
+</pre></div>
+
+<p>Additionally, the computation of <code>_m4wrap_level</code> and creation of
+multiple <code>m4wrap<var>n</var></code> placeholders in the original examples is
+more expensive in time and memory than strictly necessary.  Notice how
+the improved version grabs the wrapped text via <code>defn</code> to avoid
+parameter expansion, then undefines <code>_m4wrap_text</code>, before
+stripping a level of quotes with <code>_arg1</code> to expand the text.  That
+way, each level of wrapping reuses the single placeholder, which starts
+each nesting level in an undefined state.
+</p>
+<p>Finally, it is worth emulating the GNU M4 extension of saving
+all arguments to <code>m4wrap</code>, separated by a space, rather than saving
+just the first argument.  This is done with the <code>join</code> macro
+documented previously (see <a href="Shift.html#Shift">Shift</a>).  The improved LIFO example is
+shipped as <samp>m4-1.4.18/examples/wraplifo2.m4</samp>, and can
+easily be converted to a FIFO solution by swapping the adjacent
+invocations of <code>joinall</code> and <code>defn</code>.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`wraplifo2.m4')
+&rArr;
+undivert(`wraplifo2.m4')dnl
+&rArr;dnl Redefine m4wrap to have LIFO semantics, improved example.
+&rArr;include(`join.m4')dnl
+&rArr;define(`_m4wrap', defn(`m4wrap'))dnl
+&rArr;define(`_arg1', `$1')dnl
+&rArr;define(`m4wrap',
+&rArr;`ifdef(`_$0_text',
+&rArr;       `define(`_$0_text', joinall(` ', $@)defn(`_$0_text'))',
+&rArr;       `_$0(`_arg1(defn(`_$0_text')undefine(`_$0_text'))')dnl
+&rArr;define(`_$0_text', joinall(` ', $@))')')dnl
+m4wrap(`define(`foo', ``$0:'-$1-$*-$#-')foo(`a', `b')
+')
+&rArr;
+m4wrap(`lifo text
+m4wrap(`nested', `', `$@
+')')
+&rArr;
+^D
+&rArr;lifo text
+&rArr;foo:-a-a,b-2-
+&rArr;nested  $@
+</pre></div>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Improved-cleardivert.html#Improved-cleardivert" accesskey="n" rel="next">Improved cleardivert</a>, Previous: <a href="Improved-copy.html#Improved-copy" accesskey="p" rel="prev">Improved copy</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

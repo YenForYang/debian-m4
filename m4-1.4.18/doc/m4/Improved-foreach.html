@@ -1,0 +1,427 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Improved foreach (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Improved foreach (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Improved foreach (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Answers.html#Answers" rel="up" title="Answers">
+<link href="Improved-copy.html#Improved-copy" rel="next" title="Improved copy">
+<link href="Improved-forloop.html#Improved-forloop" rel="prev" title="Improved forloop">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Improved-foreach"></a>
+<div class="header">
+<p>
+Next: <a href="Improved-copy.html#Improved-copy" accesskey="n" rel="next">Improved copy</a>, Previous: <a href="Improved-forloop.html#Improved-forloop" accesskey="p" rel="prev">Improved forloop</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Solution-for-foreach"></a>
+<h3 class="section">17.3 Solution for <code>foreach</code></h3>
+
+<p>The <code>foreach</code> and <code>foreachq</code> macros (see <a href="Foreach.html#Foreach">Foreach</a>) as
+presented earlier each have flaws.  First, we will examine and fix the
+quadratic behavior of <code>foreachq</code>:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreachq.m4')
+&rArr;
+traceon(`shift')debugmode(`aq')
+&rArr;
+foreachq(`x', ``1', `2', `3', `4'', `x
+')dnl
+&rArr;1
+error&rarr;m4trace: -3- shift(`1', `2', `3', `4')
+error&rarr;m4trace: -2- shift(`1', `2', `3', `4')
+&rArr;2
+error&rarr;m4trace: -4- shift(`1', `2', `3', `4')
+error&rarr;m4trace: -3- shift(`2', `3', `4')
+error&rarr;m4trace: -3- shift(`1', `2', `3', `4')
+error&rarr;m4trace: -2- shift(`2', `3', `4')
+&rArr;3
+error&rarr;m4trace: -5- shift(`1', `2', `3', `4')
+error&rarr;m4trace: -4- shift(`2', `3', `4')
+error&rarr;m4trace: -3- shift(`3', `4')
+error&rarr;m4trace: -4- shift(`1', `2', `3', `4')
+error&rarr;m4trace: -3- shift(`2', `3', `4')
+error&rarr;m4trace: -2- shift(`3', `4')
+&rArr;4
+error&rarr;m4trace: -6- shift(`1', `2', `3', `4')
+error&rarr;m4trace: -5- shift(`2', `3', `4')
+error&rarr;m4trace: -4- shift(`3', `4')
+error&rarr;m4trace: -3- shift(`4')
+</pre></div>
+
+<a name="index-quadratic-behavior_002c-avoiding"></a>
+<a name="index-avoiding-quadratic-behavior"></a>
+<p>Each successive iteration was adding more quoted <code>shift</code>
+invocations, and the entire list contents were passing through every
+iteration.  In general, when recursing, it is a good idea to make the
+recursion use fewer arguments, rather than adding additional quoted
+uses of <code>shift</code>.  By doing so, <code>m4</code> uses less memory, invokes
+fewer macros, is less likely to run into machine limits, and most
+importantly, performs faster.  The fixed version of <code>foreachq</code> can
+be found in <samp>m4-1.4.18/examples/foreachq2.m4</samp>:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreachq2.m4')
+&rArr;
+undivert(`foreachq2.m4')dnl
+&rArr;include(`quote.m4')dnl
+&rArr;divert(`-1')
+&rArr;# foreachq(x, `item_1, item_2, ..., item_n', stmt)
+&rArr;#   quoted list, improved version
+&rArr;define(`foreachq', `pushdef(`$1')_$0($@)popdef(`$1')')
+&rArr;define(`_arg1q', ``$1'')
+&rArr;define(`_rest', `ifelse(`$#', `1', `', `dquote(shift($@))')')
+&rArr;define(`_foreachq', `ifelse(`$2', `', `',
+&rArr;  `define(`$1', _arg1q($2))$3`'$0(`$1', _rest($2), `$3')')')
+&rArr;divert`'dnl
+traceon(`shift')debugmode(`aq')
+&rArr;
+foreachq(`x', ``1', `2', `3', `4'', `x
+')dnl
+&rArr;1
+error&rarr;m4trace: -3- shift(`1', `2', `3', `4')
+&rArr;2
+error&rarr;m4trace: -3- shift(`2', `3', `4')
+&rArr;3
+error&rarr;m4trace: -3- shift(`3', `4')
+&rArr;4
+</pre></div>
+
+<p>Note that the fixed version calls unquoted helper macros in
+<code><span class="nolinebreak">_foreachq</span><!-- /@w --></code> to trim elements immediately; those helper macros
+in turn must re-supply the layer of quotes lost in the macro invocation.
+Contrast the use of <code><span class="nolinebreak">_arg1q</span><!-- /@w --></code>, which quotes the first list
+element, with <code><span class="nolinebreak">_arg1</span><!-- /@w --></code> of the earlier implementation that
+returned the first list element directly.  Additionally, by calling the
+helper method immediately, the &lsquo;<samp>defn(`<var>iterator</var>')</samp>&rsquo; no longer
+contains unexpanded macros.
+</p>
+<p>The astute m4 programmer might notice that the solution above still uses
+more memory and macro invocations, and thus more time, than strictly
+necessary.  Note that &lsquo;<samp>$2</samp>&rsquo;, which contains an arbitrarily long
+quoted list, is expanded and rescanned three times per iteration of
+<code>_foreachq</code>. Furthermore, every iteration of the algorithm
+effectively unboxes then reboxes the list, which costs a couple of macro
+invocations.  It is possible to rewrite the algorithm for a bit more
+speed by swapping the order of the arguments to <code>_foreachq</code> in
+order to operate on an unboxed list in the first place, and by using the
+fixed-length &lsquo;<samp>$#</samp>&rsquo; instead of an arbitrary length list as the key to
+end recursion.  The result is an overhead of six macro invocations per
+loop (excluding any macros in <var>text</var>), instead of eight.  This
+alternative approach is available as
+<samp>m4-1.4.18/examples/foreach3.m4</samp>:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreachq3.m4')
+&rArr;
+undivert(`foreachq3.m4')dnl
+&rArr;divert(`-1')
+&rArr;# foreachq(x, `item_1, item_2, ..., item_n', stmt)
+&rArr;#   quoted list, alternate improved version
+&rArr;define(`foreachq', `ifelse(`$2', `', `',
+&rArr;  `pushdef(`$1')_$0(`$1', `$3', `', $2)popdef(`$1')')')
+&rArr;define(`_foreachq', `ifelse(`$#', `3', `',
+&rArr;  `define(`$1', `$4')$2`'$0(`$1', `$2',
+&rArr;    shift(shift(shift($@))))')')
+&rArr;divert`'dnl
+traceon(`shift')debugmode(`aq')
+&rArr;
+foreachq(`x', ``1', `2', `3', `4'', `x
+')dnl
+&rArr;1
+error&rarr;m4trace: -4- shift(`x', `x
+error&rarr;', `', `1', `2', `3', `4')
+error&rarr;m4trace: -3- shift(`x
+error&rarr;', `', `1', `2', `3', `4')
+error&rarr;m4trace: -2- shift(`', `1', `2', `3', `4')
+&rArr;2
+error&rarr;m4trace: -4- shift(`x', `x
+error&rarr;', `1', `2', `3', `4')
+error&rarr;m4trace: -3- shift(`x
+error&rarr;', `1', `2', `3', `4')
+error&rarr;m4trace: -2- shift(`1', `2', `3', `4')
+&rArr;3
+error&rarr;m4trace: -4- shift(`x', `x
+error&rarr;', `2', `3', `4')
+error&rarr;m4trace: -3- shift(`x
+error&rarr;', `2', `3', `4')
+error&rarr;m4trace: -2- shift(`2', `3', `4')
+&rArr;4
+error&rarr;m4trace: -4- shift(`x', `x
+error&rarr;', `3', `4')
+error&rarr;m4trace: -3- shift(`x
+error&rarr;', `3', `4')
+error&rarr;m4trace: -2- shift(`3', `4')
+</pre></div>
+
+<p>In the current version of M4, every instance of &lsquo;<samp>$@</samp>&rsquo; is rescanned
+as it is encountered.  Thus, the <samp>foreachq3.m4</samp> alternative uses
+much less memory than <samp>foreachq2.m4</samp>, and executes as much as 10%
+faster, since each iteration encounters fewer &lsquo;<samp>$@</samp>&rsquo;.  However, the
+implementation of rescanning every byte in &lsquo;<samp>$@</samp>&rsquo; is quadratic in
+the number of bytes scanned (for example, making the broken version in
+<samp>foreachq.m4</samp> cubic, rather than quadratic, in behavior).  A future
+release of M4 will improve the underlying implementation by reusing
+results of previous scans, so that both styles of <code>foreachq</code> can
+become linear in the number of bytes scanned.  Notice how the
+implementation injects an empty argument prior to expanding &lsquo;<samp>$2</samp>&rsquo;
+within <code>foreachq</code>; the helper macro <code>_foreachq</code> then ignores
+the third argument altogether, and ends recursion when there are three
+arguments left because there was nothing left to pass through
+<code>shift</code>.  Thus, each iteration only needs one <code>ifelse</code>, rather
+than the two conditionals used in the version from <samp>foreachq2.m4</samp>.
+</p>
+<a name="index-nine-arguments_002c-more-than-2"></a>
+<a name="index-more-than-nine-arguments-2"></a>
+<a name="index-arguments_002c-more-than-nine-2"></a>
+<p>So far, all of the implementations of <code>foreachq</code> presented have
+been quadratic with M4 1.4.x.  But <code>forloop</code> is linear, because
+each iteration parses a constant amount of arguments.  So, it is
+possible to design a variant that uses <code>forloop</code> to do the
+iteration, then uses &lsquo;<samp>$@</samp>&rsquo; only once at the end, giving a linear
+result even with older M4 implementations.  This implementation relies
+on the GNU extension that &lsquo;<samp>$10</samp>&rsquo; expands to the tenth
+argument rather than the first argument concatenated with &lsquo;<samp>0</samp>&rsquo;.  The
+trick is to define an intermediate macro that repeats the text
+<code>m4_define(`$1', `$<var>n</var>')$2`'</code>, with &lsquo;<samp>n</samp>&rsquo; set to successive
+integers corresponding to each argument.  The helper macro
+<code>_foreachq_</code> is needed in order to generate the literal sequences
+such as &lsquo;<samp>$1</samp>&rsquo; into the intermediate macro, rather than expanding
+them as the arguments of <code>_foreachq</code>.  With this approach, no
+<code>shift</code> calls are even needed!  Even though there are seven macros
+of overhead per iteration instead of six in <samp>foreachq3.m4</samp>, the
+linear scaling is apparent at relatively small list sizes.  However,
+this approach will need adjustment when a future version of M4 follows
+POSIX by no longer treating &lsquo;<samp>$10</samp>&rsquo; as the tenth argument;
+the anticipation is that &lsquo;<samp>${10}</samp>&rsquo; can be used instead, although
+that alternative syntax is not yet supported.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreachq4.m4')
+&rArr;
+undivert(`foreachq4.m4')dnl
+&rArr;include(`forloop2.m4')dnl
+&rArr;divert(`-1')
+&rArr;# foreachq(x, `item_1, item_2, ..., item_n', stmt)
+&rArr;#   quoted list, version based on forloop
+&rArr;define(`foreachq',
+&rArr;`ifelse(`$2', `', `', `_$0(`$1', `$3', $2)')')
+&rArr;define(`_foreachq',
+&rArr;`pushdef(`$1', forloop(`$1', `3', `$#',
+&rArr;  `$0_(`1', `2', indir(`$1'))')`popdef(
+&rArr;    `$1')')indir(`$1', $@)')
+&rArr;define(`_foreachq_',
+&rArr;``define(`$$1', `$$3')$$2`''')
+&rArr;divert`'dnl
+traceon(`shift')debugmode(`aq')
+&rArr;
+foreachq(`x', ``1', `2', `3', `4'', `x
+')dnl
+&rArr;1
+&rArr;2
+&rArr;3
+&rArr;4
+</pre></div>
+
+<p>For yet another approach, the improved version of <code>foreach</code>,
+available in <samp>m4-1.4.18/examples/foreach2.m4</samp>, simply
+overquotes the arguments to <code><span class="nolinebreak">_foreach</span><!-- /@w --></code> to begin with, using
+<code>dquote_elt</code>.  Then <code><span class="nolinebreak">_foreach</span><!-- /@w --></code> can just use
+<code><span class="nolinebreak">_arg1</span><!-- /@w --></code> to remove the extra layer of quoting that was added up
+front:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreach2.m4')
+&rArr;
+undivert(`foreach2.m4')dnl
+&rArr;include(`quote.m4')dnl
+&rArr;divert(`-1')
+&rArr;# foreach(x, (item_1, item_2, ..., item_n), stmt)
+&rArr;#   parenthesized list, improved version
+&rArr;define(`foreach', `pushdef(`$1')_$0(`$1',
+&rArr;  (dquote(dquote_elt$2)), `$3')popdef(`$1')')
+&rArr;define(`_arg1', `$1')
+&rArr;define(`_foreach', `ifelse(`$2', `(`')', `',
+&rArr;  `define(`$1', _arg1$2)$3`'$0(`$1', (dquote(shift$2)), `$3')')')
+&rArr;divert`'dnl
+traceon(`shift')debugmode(`aq')
+&rArr;
+foreach(`x', `(`1', `2', `3', `4')', `x
+')dnl
+error&rarr;m4trace: -4- shift(`1', `2', `3', `4')
+error&rarr;m4trace: -4- shift(`2', `3', `4')
+error&rarr;m4trace: -4- shift(`3', `4')
+&rArr;1
+error&rarr;m4trace: -3- shift(``1'', ``2'', ``3'', ``4'')
+&rArr;2
+error&rarr;m4trace: -3- shift(``2'', ``3'', ``4'')
+&rArr;3
+error&rarr;m4trace: -3- shift(``3'', ``4'')
+&rArr;4
+error&rarr;m4trace: -3- shift(``4'')
+</pre></div>
+
+<p>It is likewise possible to write a variant of <code>foreach</code> that
+performs in linear time on M4 1.4.x; the easiest method is probably
+writing a version of <code>foreach</code> that unboxes its list, then invokes
+<code>_foreachq</code> as previously defined in <samp>foreachq4.m4</samp>.
+</p>
+<p>In summary, recursion over list elements is trickier than it appeared at
+first glance, but provides a powerful idiom within <code>m4</code> processing.
+As a final demonstration, both list styles are now able to handle
+several scenarios that would wreak havoc on one or both of the original
+implementations.  This points out one other difference between the
+list styles.  <code>foreach</code> evaluates unquoted list elements only once,
+in preparation for calling <code><span class="nolinebreak">_foreach</span><!-- /@w --></code>, similary for
+<code>foreachq</code> as provided by <samp>foreachq3.m4</samp> or
+<samp>foreachq4.m4</samp>.  But
+<code>foreachq</code>, as provided by <samp>foreachq2.m4</samp>,
+evaluates unquoted list elements twice while visiting the first list
+element, once in <code><span class="nolinebreak">_arg1q</span><!-- /@w --></code> and once in <code><span class="nolinebreak">_rest</span><!-- /@w --></code>.  When
+deciding which list style to use, one must take into account whether
+repeating the side effects of unquoted list elements will have any
+detrimental effects.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`foreach2.m4')
+&rArr;
+include(`foreachq2.m4')
+&rArr;
+dnl 0-element list:
+foreach(`x', `', `&lt;x&gt;') / foreachq(`x', `', `&lt;x&gt;')
+&rArr; / <!-- /@w -->
+dnl 1-element list of empty element
+foreach(`x', `()', `&lt;x&gt;') / foreachq(`x', ``'', `&lt;x&gt;')
+&rArr;&lt;&gt; / &lt;&gt;
+dnl 2-element list of empty elements
+foreach(`x', `(`',`')', `&lt;x&gt;') / foreachq(`x', ``',`'', `&lt;x&gt;')
+&rArr;&lt;&gt;&lt;&gt; / &lt;&gt;&lt;&gt;
+dnl 1-element list of a comma
+foreach(`x', `(`,')', `&lt;x&gt;') / foreachq(`x', ``,'', `&lt;x&gt;')
+&rArr;&lt;,&gt; / &lt;,&gt;
+dnl 2-element list of unbalanced parentheses
+foreach(`x', `(`(', `)')', `&lt;x&gt;') / foreachq(`x', ``(', `)'', `&lt;x&gt;')
+&rArr;&lt;(&gt;&lt;)&gt; / &lt;(&gt;&lt;)&gt;
+define(`ab', `oops')dnl using defn(`iterator')
+foreach(`x', `(`a', `b')', `defn(`x')') /dnl
+ foreachq(`x', ``a', `b'', `defn(`x')')
+&rArr;ab / ab
+define(`active', `ACT, IVE')
+&rArr;
+traceon(`active')
+&rArr;
+dnl list of unquoted macros; expansion occurs before recursion
+foreach(`x', `(active, active)', `&lt;x&gt;
+')dnl
+error&rarr;m4trace: -4- active -&gt; `ACT, IVE'
+error&rarr;m4trace: -4- active -&gt; `ACT, IVE'
+&rArr;&lt;ACT&gt;
+&rArr;&lt;IVE&gt;
+&rArr;&lt;ACT&gt;
+&rArr;&lt;IVE&gt;
+foreachq(`x', `active, active', `&lt;x&gt;
+')dnl
+error&rarr;m4trace: -3- active -&gt; `ACT, IVE'
+error&rarr;m4trace: -3- active -&gt; `ACT, IVE'
+&rArr;&lt;ACT&gt;
+error&rarr;m4trace: -3- active -&gt; `ACT, IVE'
+error&rarr;m4trace: -3- active -&gt; `ACT, IVE'
+&rArr;&lt;IVE&gt;
+&rArr;&lt;ACT&gt;
+&rArr;&lt;IVE&gt;
+dnl list of quoted macros; expansion occurs during recursion
+foreach(`x', `(`active', `active')', `&lt;x&gt;
+')dnl
+error&rarr;m4trace: -1- active -&gt; `ACT, IVE'
+&rArr;&lt;ACT, IVE&gt;
+error&rarr;m4trace: -1- active -&gt; `ACT, IVE'
+&rArr;&lt;ACT, IVE&gt;
+foreachq(`x', ``active', `active'', `&lt;x&gt;
+')dnl
+error&rarr;m4trace: -1- active -&gt; `ACT, IVE'
+&rArr;&lt;ACT, IVE&gt;
+error&rarr;m4trace: -1- active -&gt; `ACT, IVE'
+&rArr;&lt;ACT, IVE&gt;
+dnl list of double-quoted macro names; no expansion
+foreach(`x', `(``active'', ``active'')', `&lt;x&gt;
+')dnl
+&rArr;&lt;active&gt;
+&rArr;&lt;active&gt;
+foreachq(`x', ```active'', ``active''', `&lt;x&gt;
+')dnl
+&rArr;&lt;active&gt;
+&rArr;&lt;active&gt;
+</pre></div>
+
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Improved-copy.html#Improved-copy" accesskey="n" rel="next">Improved copy</a>, Previous: <a href="Improved-forloop.html#Improved-forloop" accesskey="p" rel="prev">Improved forloop</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

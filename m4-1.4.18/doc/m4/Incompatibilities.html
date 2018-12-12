@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Incompatibilities (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Incompatibilities (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Incompatibilities (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Compatibility.html#Compatibility" rel="up" title="Compatibility">
+<link href="Other-Incompatibilities.html#Other-Incompatibilities" rel="next" title="Other Incompatibilities">
+<link href="Extensions.html#Extensions" rel="prev" title="Extensions">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Incompatibilities"></a>
+<div class="header">
+<p>
+Next: <a href="Other-Incompatibilities.html#Other-Incompatibilities" accesskey="n" rel="next">Other Incompatibilities</a>, Previous: <a href="Extensions.html#Extensions" accesskey="p" rel="prev">Extensions</a>, Up: <a href="Compatibility.html#Compatibility" accesskey="u" rel="up">Compatibility</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Facilities-in-System-V-m4-not-in-GNU-m4"></a>
+<h3 class="section">16.2 Facilities in System V <code>m4</code> not in GNU <code>m4</code></h3>
+
+<p>The version of <code>m4</code> from System V contains a few facilities that
+have not been implemented in GNU <code>m4</code> yet.  Additionally,
+POSIX requires some behaviors that GNU <code>m4</code> has not
+implemented yet.  Relying on these behaviors is non-portable, as a
+future release of GNU <code>m4</code> may change.
+</p>
+<ul>
+<li> POSIX requires support for multiple arguments to <code>defn</code>,
+without any clarification on how <code>defn</code> behaves when one of the
+multiple arguments names a builtin.  System V <code>m4</code> and some other
+implementations allow mixing builtins and text macros into a single
+macro.  GNU <code>m4</code> only supports joining multiple text
+arguments, although a future implementation may lift this restriction to
+behave more like System V.  The only portable way to join text macros
+with builtins is via helper macros and implicit concatenation of macro
+results.
+
+</li><li> POSIX requires an application to exit with non-zero status if
+it wrote an error message to stderr.  This has not yet been consistently
+implemented for the various builtins that are required to issue an error
+(such as <code>eval</code> (see <a href="Eval.html#Eval">Eval</a>) when an argument cannot be parsed).
+
+</li><li> Some traditional implementations only allow reading standard input
+once, but GNU <code>m4</code> correctly handles multiple instances
+of &lsquo;<samp>-</samp>&rsquo; on the command line.
+
+</li><li> POSIX requires <code>m4wrap</code> (see <a href="M4wrap.html#M4wrap">M4wrap</a>) to act in FIFO
+(first-in, first-out) order, but GNU <code>m4</code> currently uses
+LIFO order.  Furthermore, POSIX states that only the first
+argument to <code>m4wrap</code> is saved for later evaluation, but
+GNU <code>m4</code> saves and processes all arguments, with output
+separated by spaces.
+
+</li><li> POSIX states that builtins that require arguments, but are
+called without arguments, have undefined behavior.  Traditional
+implementations simply behave as though empty strings had been passed.
+For example, <code>a`'define`'b</code> would expand to <code>ab</code>.  But
+GNU <code>m4</code> ignores certain builtins if they have missing
+arguments, giving <code>adefineb</code> for the above example.
+
+</li><li> Traditional implementations handle <code>define(`f',`1')</code> (see <a href="Define.html#Define">Define</a>)
+by undefining the entire stack of previous definitions, and if doing
+<code>undefine(`f')</code> first.  GNU <code>m4</code> replaces just the top
+definition on the stack, as if doing <code>popdef(`f')</code> followed by
+<code>pushdef(`f',`1')</code>.  POSIX allows either behavior.
+
+</li><li> POSIX 2001 requires <code>syscmd</code> (see <a href="Syscmd.html#Syscmd">Syscmd</a>) to evaluate
+command output for macro expansion, but this was a mistake that is
+anticipated to be corrected in the next version of POSIX.
+GNU <code>m4</code> follows traditional behavior in <code>syscmd</code>
+where output is not rescanned, and provides the extension <code>esyscmd</code>
+that does scan the output.
+
+</li><li> At one point, POSIX required <code>changequote(<var>arg</var>)</code>
+(see <a href="Changequote.html#Changequote">Changequote</a>) to use newline as the close quote, but this was a
+bug, and the next version of POSIX is anticipated to state
+that using empty strings or just one argument is unspecified.
+Meanwhile, the GNU <code>m4</code> behavior of treating an empty
+end-quote delimiter as &lsquo;<samp>'</samp>&rsquo; is not portable, as Solaris treats it as
+repeating the start-quote delimiter, and BSD treats it as leaving the
+previous end-quote delimiter unchanged.  For predictable results, never
+call changequote with just one argument, or with empty strings for
+arguments.
+
+</li><li> At one point, POSIX required <code>changecom(<var>arg</var>,)</code>
+(see <a href="Changecom.html#Changecom">Changecom</a>) to make it impossible to end a comment, but this is
+a bug, and the next version of POSIX is anticipated to state
+that using empty strings is unspecified.  Meanwhile, the GNU
+<code>m4</code> behavior of treating an empty end-comment delimiter as newline
+is not portable, as BSD treats it as leaving the previous end-comment
+delimiter unchanged.  It is also impossible in BSD implementations to
+disable comments, even though that is required by POSIX.  For
+predictable results, never call changecom with empty strings for
+arguments.
+
+</li><li> Most implementations of <code>m4</code> give macros a higher precedence than
+comments when parsing, meaning that if the start delimiter given to
+<code>changecom</code> (see <a href="Changecom.html#Changecom">Changecom</a>) starts with a macro name, comments
+are effectively disabled.  POSIX does not specify what the
+precedence is, so this version of GNU <code>m4</code> parser
+recognizes comments, then macros, then quoted strings.
+
+</li><li> Traditional implementations allow argument collection, but not string
+and comment processing, to span file boundaries.  Thus, if <samp>a.m4</samp>
+contains &lsquo;<samp>len(</samp>&rsquo;, and <samp>b.m4</samp> contains &lsquo;<samp>abc)</samp>&rsquo;,
+<kbd>m4 a.m4 b.m4</kbd> outputs &lsquo;<samp>3</samp>&rsquo; with traditional <code>m4</code>, but
+gives an error message that the end of file was encountered inside a
+macro with GNU <code>m4</code>.  On the other hand, traditional
+implementations do end of file processing for files included with
+<code>include</code> or <code>sinclude</code> (see <a href="Include.html#Include">Include</a>), while GNU
+<code>m4</code> seamlessly integrates the content of those files.  Thus
+<code>include(`a.m4')include(`b.m4')</code> will output &lsquo;<samp>3</samp>&rsquo; instead of
+giving an error.
+
+</li><li> Traditional <code>m4</code> treats <code>traceon</code> (see <a href="Trace.html#Trace">Trace</a>) without
+arguments as a global variable, independent of named macro tracing.
+Also, once a macro is undefined, named tracing of that macro is lost.
+On the other hand, when GNU <code>m4</code> encounters
+<code>traceon</code> without
+arguments, it turns tracing on for all existing definitions at the time,
+but does not trace future definitions; <code>traceoff</code> without arguments
+turns tracing off for all definitions regardless of whether they were
+also traced by name; and tracing by name, such as with <samp>-tfoo</samp> at
+the command line or <code>traceon(`foo')</code> in the input, is an attribute
+that is preserved even if the macro is currently undefined.
+
+<p>Additionally, while POSIX requires trace output, it makes no
+demands on the formatting of that output.  Parsing trace output is not
+guaranteed to be reliable, even between different releases of
+GNU M4; however, the intent is that any future changes in
+trace output will only occur under the direction of additional
+<code>debugmode</code> flags (see <a href="Debug-Levels.html#Debug-Levels">Debug Levels</a>).
+</p>
+</li><li> POSIX requires <code>eval</code> (see <a href="Eval.html#Eval">Eval</a>) to treat all
+operators with the same precedence as C.  However, earlier versions of
+GNU <code>m4</code> followed the traditional behavior of other
+<code>m4</code> implementations, where bitwise and logical negation (&lsquo;<samp>~</samp>&rsquo;
+and &lsquo;<samp>!</samp>&rsquo;) have lower precedence than equality operators; and where
+equality operators (&lsquo;<samp>==</samp>&rsquo; and &lsquo;<samp>!=</samp>&rsquo;) had the same precedence as
+relational operators (such as &lsquo;<samp>&lt;</samp>&rsquo;).  Use explicit parentheses to
+ensure proper precedence.  As extensions to POSIX,
+GNU <code>m4</code> gives well-defined semantics to operations that
+C leaves undefined, such as when overflow occurs, when shifting negative
+numbers, or when performing division by zero.  POSIX also
+requires &lsquo;<samp>=</samp>&rsquo; to cause an error, but many traditional
+implementations allowed it as an alias for &lsquo;<samp>==</samp>&rsquo;.
+
+</li><li> POSIX 2001 requires <code>translit</code> (see <a href="Translit.html#Translit">Translit</a>) to
+treat each character of the second and third arguments literally.
+However, it is anticipated that the next version of POSIX will
+allow the GNU <code>m4</code> behavior of treating &lsquo;<samp>-</samp>&rsquo; as a
+range operator.
+
+</li><li> POSIX requires <code>m4</code> to honor the locale environment
+variables of <code>LANG</code>, <code>LC_ALL</code>, <code>LC_CTYPE</code>,
+<code>LC_MESSAGES</code>, and <code>NLSPATH</code>, but this has not yet been
+implemented in GNU <code>m4</code>.
+
+</li><li> POSIX states that only unquoted leading newlines and blanks
+(that is, space and tab) are ignored when collecting macro arguments.
+However, this appears to be a bug in POSIX, since most
+traditional implementations also ignore all whitespace (formfeed,
+carriage return, and vertical tab).  GNU <code>m4</code> follows
+tradition and ignores all leading unquoted whitespace.
+
+</li><li> <a name="index-POSIXLY_005fCORRECT-1"></a>
+A strictly-compliant POSIX client is not allowed to use
+command-line arguments not specified by POSIX.  However, since
+this version of M4 ignores <code>POSIXLY_CORRECT</code> and enables the option
+<code>--gnu</code> by default (see <a href="Limits-control.html#Limits-control">Invoking m4</a>), a
+client desiring to be strictly compliant has no way to disable
+GNU extensions that conflict with POSIX when
+directly invoking the compiled <code>m4</code>.  A future version of
+<code>GNU</code> M4 will honor the environment variable <code>POSIXLY_CORRECT</code>,
+implicitly enabling <samp>--traditional</samp> if it is set, in order to
+allow a strictly-compliant client.  In the meantime, a client needing
+strict POSIX compliance can use the workaround of invoking a
+shell script wrapper, where the wrapper then adds <samp>--traditional</samp>
+to the arguments passed to the compiled <code>m4</code>.
+</li></ul>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Other-Incompatibilities.html#Other-Incompatibilities" accesskey="n" rel="next">Other Incompatibilities</a>, Previous: <a href="Extensions.html#Extensions" accesskey="p" rel="prev">Extensions</a>, Up: <a href="Compatibility.html#Compatibility" accesskey="u" rel="up">Compatibility</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

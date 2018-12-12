@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Stacks (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Stacks (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Stacks (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Conditionals.html#Conditionals" rel="up" title="Conditionals">
+<link href="Composition.html#Composition" rel="next" title="Composition">
+<link href="Foreach.html#Foreach" rel="prev" title="Foreach">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Stacks"></a>
+<div class="header">
+<p>
+Next: <a href="Composition.html#Composition" accesskey="n" rel="next">Composition</a>, Previous: <a href="Foreach.html#Foreach" accesskey="p" rel="prev">Foreach</a>, Up: <a href="Conditionals.html#Conditionals" accesskey="u" rel="up">Conditionals</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Working-with-definition-stacks"></a>
+<h3 class="section">6.6 Working with definition stacks</h3>
+
+<a name="index-definition-stack-1"></a>
+<a name="index-pushdef-stack-1"></a>
+<a name="index-stack_002c-macro-definition-1"></a>
+<p>Thanks to <code>pushdef</code>, manipulation of a stack is an intrinsic
+operation in <code>m4</code>.  Normally, only the topmost definition in a
+stack is important, but sometimes, it is desirable to manipulate the
+entire definition stack.
+</p>
+<dl>
+<dt><a name="index-stack_005fforeach"></a>Composite: <strong>stack_foreach</strong> <em>(<var>macro</var>, <var>action</var>)</em></dt>
+<dt><a name="index-stack_005fforeach_005flifo"></a>Composite: <strong>stack_foreach_lifo</strong> <em>(<var>macro</var>, <var>action</var>)</em></dt>
+<dd><p>For each of the <code>pushdef</code> definitions associated with <var>macro</var>,
+invoke the macro <var>action</var> with a single argument of that definition.
+<code>stack_foreach</code> visits the oldest definition first, while
+<code>stack_foreach_lifo</code> visits the current definition first.
+<var>action</var> should not modify or dereference <var>macro</var>.  There are a
+few special macros, such as <code>defn</code>, which cannot be used as the
+<var>macro</var> parameter.
+</p></dd></dl>
+
+<p>A sample implementation of these macros is distributed in the file
+<samp>m4-1.4.18/examples/stack.m4</samp>.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`stack.m4')
+&rArr;
+pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
+&rArr;
+define(`show', ``$1'
+')
+&rArr;
+stack_foreach(`a', `show')dnl
+&rArr;1
+&rArr;2
+&rArr;3
+stack_foreach_lifo(`a', `show')dnl
+&rArr;3
+&rArr;2
+&rArr;1
+</pre></div>
+
+<p>Now for the implementation.  Note the definition of a helper macro,
+<code>_stack_reverse</code>, which destructively swaps the contents of one
+stack of definitions into the reverse order in the temporary macro
+&lsquo;<samp>tmp-$1</samp>&rsquo;.  By calling the helper twice, the original order is
+restored back into the macro &lsquo;<samp>$1</samp>&rsquo;; since the operation is
+destructive, this explains why &lsquo;<samp>$1</samp>&rsquo; must not be modified or
+dereferenced during the traversal.  The caller can then inject
+additional code to pass the definition currently being visited to
+&lsquo;<samp>$2</samp>&rsquo;.  The choice of helper names is intentional; since &lsquo;<samp>-</samp>&rsquo; is
+not valid as part of a macro name, there is no risk of conflict with a
+valid macro name, and the code is guaranteed to use <code>defn</code> where
+necessary.  Finally, note that any macro used in the traversal of a
+<code>pushdef</code> stack, such as <code>pushdef</code> or <code>defn</code>, cannot be
+handled by <code>stack_foreach</code>, since the macro would temporarily be
+undefined during the algorithm.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+undivert(`stack.m4')dnl
+&rArr;divert(`-1')
+&rArr;# stack_foreach(macro, action)
+&rArr;# Invoke ACTION with a single argument of each definition
+&rArr;# from the definition stack of MACRO, starting with the oldest.
+&rArr;define(`stack_foreach',
+&rArr;`_stack_reverse(`$1', `tmp-$1')'dnl
+&rArr;`_stack_reverse(`tmp-$1', `$1', `$2(defn(`$1'))')')
+&rArr;# stack_foreach_lifo(macro, action)
+&rArr;# Invoke ACTION with a single argument of each definition
+&rArr;# from the definition stack of MACRO, starting with the newest.
+&rArr;define(`stack_foreach_lifo',
+&rArr;`_stack_reverse(`$1', `tmp-$1', `$2(defn(`$1'))')'dnl
+&rArr;`_stack_reverse(`tmp-$1', `$1')')
+&rArr;define(`_stack_reverse',
+&rArr;`ifdef(`$1', `pushdef(`$2', defn(`$1'))$3`'popdef(`$1')$0($@)')')
+&rArr;divert`'dnl
+</pre></div>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Composition.html#Composition" accesskey="n" rel="next">Composition</a>, Previous: <a href="Foreach.html#Foreach" accesskey="p" rel="prev">Foreach</a>, Up: <a href="Conditionals.html#Conditionals" accesskey="u" rel="up">Conditionals</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Debugging options (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Debugging options (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Debugging options (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Invoking-m4.html#Invoking-m4" rel="up" title="Invoking m4">
+<link href="Command-line-files.html#Command-line-files" rel="next" title="Command line files">
+<link href="Frozen-state.html#Frozen-state" rel="prev" title="Frozen state">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Debugging-options"></a>
+<div class="header">
+<p>
+Next: <a href="Command-line-files.html#Command-line-files" accesskey="n" rel="next">Command line files</a>, Previous: <a href="Frozen-state.html#Frozen-state" accesskey="p" rel="prev">Frozen state</a>, Up: <a href="Invoking-m4.html#Invoking-m4" accesskey="u" rel="up">Invoking m4</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Command-line-options-for-debugging"></a>
+<h3 class="section">2.5 Command line options for debugging</h3>
+
+<p>Finally, there are several options for aiding in debugging <code>m4</code>
+scripts.
+</p>
+<dl compact="compact">
+<dt><code>-d<span class="roman">[</span><var>flags</var><span class="roman">]</span></code></dt>
+<dt><code>--debug<span class="roman">[</span>=<var>flags</var><span class="roman">]</span></code></dt>
+<dd><p>Set the debug-level according to the flags <var>flags</var>.  The debug-level
+controls the format and amount of information presented by the debugging
+functions.  See <a href="Debug-Levels.html#Debug-Levels">Debug Levels</a>, for more details on the format and
+meaning of <var>flags</var>.  If omitted, <var>flags</var> defaults to &lsquo;<samp>aeq</samp>&rsquo;.
+</p>
+</dd>
+<dt><code>--debugfile<span class="roman">[</span>=<var>file</var><span class="roman">]</span></code></dt>
+<dt><code>-o <var>file</var></code></dt>
+<dt><code>--error-output=<var>file</var></code></dt>
+<dd><p>Redirect <code>dumpdef</code> output, debug messages, and trace output to the
+named <var>file</var>.  Warnings, error messages, and <code>errprint</code> output
+are still printed to standard error.  If these options are not used, or
+if <var>file</var> is unspecified (only possible for <samp>--debugfile</samp>),
+debug output goes to standard error; if <var>file</var> is the empty string,
+debug output is discarded.  See <a href="Debug-Output.html#Debug-Output">Debug Output</a>, for more details.  The
+option <samp>--debugfile</samp> may be given more than once, and order is
+significant with respect to file names.  The spellings <samp>-o</samp> and
+<samp>--error-output</samp> are misleading and inconsistent with other
+GNU tools; for now they are silently accepted as synonyms of
+<samp>--debugfile</samp> and only recognized once, but in a future version
+of M4, using them will cause a warning to be issued.
+</p>
+
+</dd>
+<dt><code>-l <var>num</var></code></dt>
+<dt><code>--arglength=<var>num</var></code></dt>
+<dd><p>Restrict the size of the output generated by macro tracing to <var>num</var>
+characters per trace line.  If unspecified or zero, output is
+unlimited.  See <a href="Debug-Levels.html#Debug-Levels">Debug Levels</a>, for more details.
+</p>
+</dd>
+<dt><code>-t <var>name</var></code></dt>
+<dt><code>--trace=<var>name</var></code></dt>
+<dd><p>This enables tracing for the macro <var>name</var>, at any point where it is
+defined.  <var>name</var> need not be defined when this option is given.
+This option may be given more than once, and order is significant with
+respect to file names.  See <a href="Trace.html#Trace">Trace</a>, for more details.
+</p></dd>
+</dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Command-line-files.html#Command-line-files" accesskey="n" rel="next">Command line files</a>, Previous: <a href="Frozen-state.html#Frozen-state" accesskey="p" rel="prev">Frozen state</a>, Up: <a href="Invoking-m4.html#Invoking-m4" accesskey="u" rel="up">Invoking m4</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

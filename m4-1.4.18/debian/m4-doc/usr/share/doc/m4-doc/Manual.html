@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Manual (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Manual (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Manual (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Preliminaries.html#Preliminaries" rel="up" title="Preliminaries">
+<link href="Invoking-m4.html#Invoking-m4" rel="next" title="Invoking m4">
+<link href="Bugs.html#Bugs" rel="prev" title="Bugs">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Manual"></a>
+<div class="header">
+<p>
+Previous: <a href="Bugs.html#Bugs" accesskey="p" rel="prev">Bugs</a>, Up: <a href="Preliminaries.html#Preliminaries" accesskey="u" rel="up">Preliminaries</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Using-this-manual"></a>
+<h3 class="section">1.4 Using this manual</h3>
+
+<a name="index-examples_002c-understanding"></a>
+<p>This manual contains a number of examples of <code>m4</code> input and output,
+and a simple notation is used to distinguish input, output and error
+messages from <code>m4</code>.  Examples are set out from the normal text, and
+shown in a fixed width font, like this
+</p>
+<div class="example">
+<pre class="example">This is an example of an example!
+</pre></div>
+
+<p>To distinguish input from output, all output from <code>m4</code> is prefixed
+by the string &lsquo;<samp>&rArr;</samp>&rsquo;, and all error messages by the string
+&lsquo;<samp>error&rarr;</samp>&rsquo;.  When showing how command line options affect matters,
+the command line is shown with a prompt &lsquo;<samp>$ <kbd>like this</kbd></samp>&rsquo;,
+otherwise, you can assume that a simple <kbd>m4</kbd> invocation will work.
+Thus:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>command line to invoke m4</kbd>
+Example of input line
+&rArr;Output line from m4
+error&rarr;and an error message
+</pre></div>
+
+<p>The sequence &lsquo;<samp>^D</samp>&rsquo; in an example indicates the end of the input
+file.  The sequence &lsquo;<samp><span class="key">NL</span></samp>&rsquo; refers to the newline character.
+The majority of these examples are self-contained, and you can run them
+with similar results by invoking <kbd>m4 -d</kbd>.  In fact, the testsuite
+that is bundled in the GNU M4 package consists of the examples
+in this document!  Some of the examples assume that your current
+directory is located where you unpacked the installation, so if you plan
+on following along, you may find it helpful to do this now:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>cd m4-1.4.18</kbd>
+</pre></div>
+
+<p>As each of the predefined macros in <code>m4</code> is described, a prototype
+call of the macro will be shown, giving descriptive names to the
+arguments, e.g.,
+</p>
+<dl>
+<dt><a name="index-example"></a>Composite: <strong>example</strong> <em>(<var>string</var>, <span class="roman">[</span><var>count</var> = &lsquo;<samp>1</samp>&rsquo;<span class="roman">]</span>,   <span class="roman">[</span><var>argument</var><span class="roman">]</span>&hellip;)</em></dt>
+<dd><p>This is a sample prototype.  There is not really a macro named
+<code>example</code>, but this documents that if there were, it would be a
+Composite macro, rather than a Builtin.  It requires at least one
+argument, <var>string</var>.  Remember that in <code>m4</code>, there must not be a
+space between the macro name and the opening parenthesis, unless it was
+intended to call the macro without any arguments.  The brackets around
+<var>count</var> and <var>argument</var> show that these arguments are optional.
+If <var>count</var> is omitted, the macro behaves as if count were &lsquo;<samp>1</samp>&rsquo;,
+whereas if <var>argument</var> is omitted, the macro behaves as if it were
+the empty string.  A blank argument is not the same as an omitted
+argument.  For example, &lsquo;<samp>example(`a')</samp>&rsquo;, &lsquo;<samp>example(`a',`1')</samp>&rsquo;,
+and &lsquo;<samp>example(`a',`1',)</samp>&rsquo; would behave identically with <var>count</var>
+set to &lsquo;<samp>1</samp>&rsquo;; while &lsquo;<samp>example(`a',)</samp>&rsquo; and &lsquo;<samp>example(`a',`')</samp>&rsquo;
+would explicitly pass the empty string for <var>count</var>.  The ellipses
+(&lsquo;<samp>&hellip;</samp>&rsquo;) show that the macro processes additional arguments
+after <var>argument</var>, rather than ignoring them.
+</p></dd></dl>
+
+<a name="index-numbers"></a>
+<p>All macro arguments in <code>m4</code> are strings, but some are given
+special interpretation, e.g., as numbers, file names, regular
+expressions, etc.  The documentation for each macro will state how the
+parameters are interpreted, and what happens if the argument cannot be
+parsed according to the desired interpretation.  Unless specified
+otherwise, a parameter specified to be a number is parsed as a decimal,
+even if the argument has leading zeros; and parsing the empty string as
+a number results in 0 rather than an error, although a warning will be
+issued.
+</p>
+<p>This document consistently writes and uses <em>builtin</em>, without a
+hyphen, as if it were an English word.  This is how the <code>builtin</code>
+primitive is spelled within <code>m4</code>.
+</p>
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Bugs.html#Bugs" accesskey="p" rel="prev">Bugs</a>, Up: <a href="Preliminaries.html#Preliminaries" accesskey="u" rel="up">Preliminaries</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

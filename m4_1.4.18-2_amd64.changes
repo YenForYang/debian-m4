@@ -1,0 +1,35 @@
+Format: 1.8
+Date: Sat, 01 Dec 2018 15:46:54 +0100
+Source: m4
+Binary: m4 m4-doc
+Built-For-Profiles: nobiarch nocheck
+Architecture: amd64 all
+Version: 1.4.18-2
+Distribution: unstable
+Urgency: medium
+Maintainer: Santiago Vila <sanvila@debian.org>
+Changed-By: Santiago Vila <sanvila@debian.org>
+Description:
+ m4         - macro processing language
+ m4-doc     - Documentation for GNU m4
+Closes: 915152
+Changes:
+ m4 (1.4.18-2) unstable; urgency=medium
+ .
+   * Fix FTBFS with glibc 2.28. Closes: #915152.
+   * Rules-Requires-Root: no.
+Checksums-Sha1:
+ b7834c9d16211a77948ae87675c99b08125ee27a 123792 m4-dbgsym_1.4.18-2_amd64.deb
+ 0c5a20e71baeb6efa357aa0e4cc00d1facd6960c 118796 m4-doc_1.4.18-2_all.deb
+ 3e34db20b3e14fdf408bffa9dbc8369c5c8a53f8 5716 m4_1.4.18-2_amd64.buildinfo
+ d4048c0a5bf71ecd7e2c127e36829fc0e423dd3a 229276 m4_1.4.18-2_amd64.deb
+Checksums-Sha256:
+ 32a2ad386f2deec6f1066b629409a58fb333cb8ab5d618b3b7e647be7bea5561 123792 m4-dbgsym_1.4.18-2_amd64.deb
+ 521c6425da9b69d991f517ff05c198370ce766501a7275e2916cd50959ece998 118796 m4-doc_1.4.18-2_all.deb
+ 4b04afcbde150b15c325ea7372cb4f192a8e58415ab8083534031e868b6b10da 5716 m4_1.4.18-2_amd64.buildinfo
+ 366c6a713bf4757f8a4b6b073a65241587f9234df1d219303314ede2fa70d78c 229276 m4_1.4.18-2_amd64.deb
+Files:
+ 905fdc77540cf79ab73e31125351e5fc 123792 debug optional m4-dbgsym_1.4.18-2_amd64.deb
+ 3257ca21f3f078f99e2c51adde56ce0f 118796 doc optional m4-doc_1.4.18-2_all.deb
+ 7508d62db0f19c2a410c11eb98b9c342 5716 interpreters optional m4_1.4.18-2_amd64.buildinfo
+ 035b051b5df68053996adddb06c265c1 229276 interpreters optional m4_1.4.18-2_amd64.deb

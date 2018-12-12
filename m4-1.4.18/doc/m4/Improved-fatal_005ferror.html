@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Improved fatal_error (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Improved fatal_error (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Improved fatal_error (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Answers.html#Answers" rel="up" title="Answers">
+<link href="Copying-This-Package.html#Copying-This-Package" rel="next" title="Copying This Package">
+<link href="Improved-capitalize.html#Improved-capitalize" rel="prev" title="Improved capitalize">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Improved-fatal_005ferror"></a>
+<div class="header">
+<p>
+Previous: <a href="Improved-capitalize.html#Improved-capitalize" accesskey="p" rel="prev">Improved capitalize</a>, Up: <a href="Answers.html#Answers" accesskey="u" rel="up">Answers</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Solution-for-fatal_005ferror"></a>
+<h3 class="section">17.8 Solution for <code>fatal_error</code></h3>
+
+<p>The <code>fatal_error</code> macro (see <a href="M4exit.html#M4exit">M4exit</a>) is not robust to versions
+of GNU M4 earlier than 1.4.8, where invoking
+<code><span class="nolinebreak">__file__</span><!-- /@w --></code> (see <a href="Location.html#Location">Location</a>) inside <code>m4wrap</code> would result
+in an empty string, and <code><span class="nolinebreak">__line__</span><!-- /@w --></code> resulted in &lsquo;<samp>0</samp>&rsquo; even
+though all files start at line 1.  Furthermore, versions earlier than
+1.4.6 did not support the <code><span class="nolinebreak">__program__</span><!-- /@w --></code> macro.  If you want
+<code>fatal_error</code> to work across the entire 1.4.x release series, a
+better implementation would be:
+</p>
+<div class="example">
+<pre class="example">define(`fatal_error',
+  `errprint(ifdef(`__program__', `__program__', ``m4'')'dnl
+`:ifelse(__line__, `0', `',
+    `__file__:__line__:')` fatal error: $*
+')m4exit(`1')')
+&rArr;
+m4wrap(`divnum(`demo of internal message')
+fatal_error(`inside wrapped text')')
+&rArr;
+^D
+error&rarr;m4:stdin:6: Warning: excess arguments to builtin `divnum' ignored
+&rArr;0
+error&rarr;m4:stdin:6: fatal error: inside wrapped text
+</pre></div>
+
+
+
+
+
+</body>
+</html>

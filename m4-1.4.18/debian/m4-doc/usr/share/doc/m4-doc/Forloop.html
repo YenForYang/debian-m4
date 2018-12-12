@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Forloop (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Forloop (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Forloop (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Conditionals.html#Conditionals" rel="up" title="Conditionals">
+<link href="Foreach.html#Foreach" rel="next" title="Foreach">
+<link href="Shift.html#Shift" rel="prev" title="Shift">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Forloop"></a>
+<div class="header">
+<p>
+Next: <a href="Foreach.html#Foreach" accesskey="n" rel="next">Foreach</a>, Previous: <a href="Shift.html#Shift" accesskey="p" rel="prev">Shift</a>, Up: <a href="Conditionals.html#Conditionals" accesskey="u" rel="up">Conditionals</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Iteration-by-counting"></a>
+<h3 class="section">6.4 Iteration by counting</h3>
+
+<a name="index-for-loops"></a>
+<a name="index-loops_002c-counting"></a>
+<a name="index-counting-loops"></a>
+<p>Here is an example of a loop macro that implements a simple for loop.
+</p>
+<dl>
+<dt><a name="index-forloop"></a>Composite: <strong>forloop</strong> <em>(<var>iterator</var>, <var>start</var>, <var>end</var>, <var>text</var>)</em></dt>
+<dd><p>Takes the name in <var>iterator</var>, which must be a valid macro name, and
+successively assign it each integer value from <var>start</var> to <var>end</var>,
+inclusive.  For each assignment to <var>iterator</var>, append <var>text</var> to
+the expansion of the <code>forloop</code>.  <var>text</var> may refer to
+<var>iterator</var>.  Any definition of <var>iterator</var> prior to this
+invocation is restored.
+</p></dd></dl>
+
+<p>It can, for example, be used for simple counting:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`forloop.m4')
+&rArr;
+forloop(`i', `1', `8', `i ')
+&rArr;1 2 3 4 5 6 7 8 <!-- /@w -->
+</pre></div>
+
+<p>For-loops can be nested, like:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+include(`forloop.m4')
+&rArr;
+forloop(`i', `1', `4', `forloop(`j', `1', `8', ` (i, j)')
+')
+&rArr; (1, 1) (1, 2) (1, 3) (1, 4) (1, 5) (1, 6) (1, 7) (1, 8)
+&rArr; (2, 1) (2, 2) (2, 3) (2, 4) (2, 5) (2, 6) (2, 7) (2, 8)
+&rArr; (3, 1) (3, 2) (3, 3) (3, 4) (3, 5) (3, 6) (3, 7) (3, 8)
+&rArr; (4, 1) (4, 2) (4, 3) (4, 4) (4, 5) (4, 6) (4, 7) (4, 8)
+&rArr;
+</pre></div>
+
+<p>The implementation of the <code>forloop</code> macro is fairly
+straightforward.  The <code>forloop</code> macro itself is simply a wrapper,
+which saves the previous definition of the first argument, calls the
+internal macro <code><span class="nolinebreak">_forloop</span><!-- /@w --></code>, and re-establishes the saved
+definition of the first argument.
+</p>
+<p>The macro <code><span class="nolinebreak">_forloop</span><!-- /@w --></code> expands the fourth argument once, and
+tests to see if the iterator has reached the final value.  If it has
+not finished, it increments the iterator (using the predefined macro
+<code>incr</code>, see <a href="Incr.html#Incr">Incr</a>), and recurses.
+</p>
+<p>Here is an actual implementation of <code>forloop</code>, distributed as
+<samp>m4-1.4.18/examples/forloop.m4</samp> in this package:
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 -I examples</kbd>
+undivert(`forloop.m4')dnl
+&rArr;divert(`-1')
+&rArr;# forloop(var, from, to, stmt) - simple version
+&rArr;define(`forloop', `pushdef(`$1', `$2')_forloop($@)popdef(`$1')')
+&rArr;define(`_forloop',
+&rArr;       `$4`'ifelse($1, `$3', `', `define(`$1', incr($1))$0($@)')')
+&rArr;divert`'dnl
+</pre></div>
+
+<p>Notice the careful use of quotes.  Certain macro arguments are left
+unquoted, each for its own reason.  Try to find out <em>why</em> these
+arguments are left unquoted, and see what happens if they are quoted.
+(As presented, these two macros are useful but not very robust for
+general use.  They lack even basic error handling for cases like
+<var>start</var> less than <var>end</var>, <var>end</var> not numeric, or
+<var>iterator</var> not being a macro name.  See if you can improve these
+macros; or see <a href="Improved-forloop.html#Improved-forloop">Answers</a>).
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Foreach.html#Foreach" accesskey="n" rel="next">Foreach</a>, Previous: <a href="Shift.html#Shift" accesskey="p" rel="prev">Shift</a>, Up: <a href="Conditionals.html#Conditionals" accesskey="u" rel="up">Conditionals</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

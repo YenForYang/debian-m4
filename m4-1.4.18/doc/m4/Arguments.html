@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 
+This manual (31 December 2016) is for GNU M4 (version
+1.4.18), a package containing an implementation of the m4 macro
+language.
+
+Copyright (C) 1989-1994, 2004-2014, 2016 Free Software
+Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License,
+Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no
+Back-Cover Texts.  A copy of the license is included in the section
+entitled "GNU Free Documentation License." -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Arguments (GNU M4 1.4.18 macro processor)</title>
+
+<meta name="description" content="Arguments (GNU M4 1.4.18 macro processor)">
+<meta name="keywords" content="Arguments (GNU M4 1.4.18 macro processor)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Indices.html#Indices" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Definitions.html#Definitions" rel="up" title="Definitions">
+<link href="Pseudo-Arguments.html#Pseudo-Arguments" rel="next" title="Pseudo Arguments">
+<link href="Define.html#Define" rel="prev" title="Define">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<a name="Arguments"></a>
+<div class="header">
+<p>
+Next: <a href="Pseudo-Arguments.html#Pseudo-Arguments" accesskey="n" rel="next">Pseudo Arguments</a>, Previous: <a href="Define.html#Define" accesskey="p" rel="prev">Define</a>, Up: <a href="Definitions.html#Definitions" accesskey="u" rel="up">Definitions</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Arguments-to-macros"></a>
+<h3 class="section">5.2 Arguments to macros</h3>
+
+<a name="index-macros_002c-arguments-to-1"></a>
+<a name="index-arguments-to-macros-1"></a>
+<p>Macros can have arguments.  The <var>n</var>th argument is denoted by
+<code>$n</code> in the expansion text, and is replaced by the <var>n</var>th actual
+argument, when the macro is expanded.  Replacement of arguments happens
+before rescanning, regardless of how many nesting levels of quoting
+appear in the expansion.  Here is an example of a macro with
+two arguments.
+</p>
+<dl>
+<dt><a name="index-exch"></a>Composite: <strong>exch</strong> <em>(<var>arg1</var>, <var>arg2</var>)</em></dt>
+<dd><p>Expands to <var>arg2</var> followed by <var>arg1</var>, effectively exchanging
+their order.
+</p></dd></dl>
+
+<div class="example">
+<pre class="example">define(`exch', `$2, $1')
+&rArr;
+exch(`arg1', `arg2')
+&rArr;arg2, arg1
+</pre></div>
+
+<p>This can be used, for example, if you like the arguments to
+<code>define</code> to be reversed.
+</p>
+<div class="example">
+<pre class="example">define(`exch', `$2, $1')
+&rArr;
+define(exch(``expansion text'', ``macro''))
+&rArr;
+macro
+&rArr;expansion text
+</pre></div>
+
+<p>See <a href="Quoting-Arguments.html#Quoting-Arguments">Quoting Arguments</a>, for an explanation of the double quotes.
+(You should try and improve this example so that clients of <code>exch</code>
+do not have to double quote; or see <a href="Improved-exch.html#Improved-exch">Answers</a>).
+</p>
+<p>As a special case, the zeroth argument, <code>$0</code>, is always the name
+of the macro being expanded.
+</p>
+<div class="example">
+<pre class="example">define(`test', ``Macro name: $0'')
+&rArr;
+test
+&rArr;Macro name: test
+</pre></div>
+
+<p>If you want quoted text to appear as part of the expansion text,
+remember that quotes can be nested in quoted strings.  Thus, in
+</p>
+<div class="example">
+<pre class="example">define(`foo', `This is macro `foo'.')
+&rArr;
+foo
+&rArr;This is macro foo.
+</pre></div>
+
+<p>The &lsquo;<samp>foo</samp>&rsquo; in the expansion text is <em>not</em> expanded, since it is
+a quoted string, and not a name.
+</p>
+<a name="index-GNU-extensions-2"></a>
+<a name="index-nine-arguments_002c-more-than"></a>
+<a name="index-more-than-nine-arguments"></a>
+<a name="index-arguments_002c-more-than-nine"></a>
+<a name="index-positional-parameters_002c-more-than-nine"></a>
+<p>GNU <code>m4</code> allows the number following the &lsquo;<samp>$</samp>&rsquo; to
+consist of one or more digits, allowing macros to have any number of
+arguments.  The extension of accepting multiple digits is incompatible
+with POSIX, and is different than traditional implementations
+of <code>m4</code>, which only recognize one digit.  Therefore, future
+versions of GNU M4 will phase out this feature.  To portably
+access beyond the ninth argument, you can use the <code>argn</code> macro
+documented later (see <a href="Shift.html#Shift">Shift</a>).
+</p>
+<p>POSIX also states that &lsquo;<samp>$</samp>&rsquo; followed immediately by
+&lsquo;<samp>{</samp>&rsquo; in a macro definition is implementation-defined.  This version
+of M4 passes the literal characters &lsquo;<samp>${</samp>&rsquo; through unchanged, but M4
+2.0 will implement an optional feature similar to <code>sh</code>, where
+&lsquo;<samp>${11}</samp>&rsquo; expands to the eleventh argument, to replace the current
+recognition of &lsquo;<samp>$11</samp>&rsquo;.  Meanwhile, if you want to guarantee that you
+will get a literal &lsquo;<samp>${</samp>&rsquo; in output when expanding a macro, even
+when you upgrade to M4 2.0, you can use nested quoting to your
+advantage:
+</p>
+<div class="example">
+<pre class="example">define(`foo', `single quoted $`'{1} output')
+&rArr;
+define(`bar', ``double quoted $'`{2} output'')
+&rArr;
+foo(`a', `b')
+&rArr;single quoted ${1} output
+bar(`a', `b')
+&rArr;double quoted ${2} output
+</pre></div>
+
+<p>To help you detect places in your M4 input files that might change in
+behavior due to the changed behavior of M4 2.0, you can use the
+<samp>--warn-macro-sequence</samp> command-line option (see <a href="Operation-modes.html#Operation-modes">Invoking m4</a>) with the default regular expression.  This will
+add a warning any time a macro definition includes &lsquo;<samp>$</samp>&rsquo; followed by
+multiple digits, or by &lsquo;<samp>{</samp>&rsquo;.  The warning is not enabled by
+default, because it triggers a number of warnings in Autoconf 2.61 (and
+Autoconf uses <samp>-E</samp> to treat warnings as errors), and because it
+will still be possible to restore older behavior in M4 2.0.
+</p>
+<div class="example">
+<pre class="example">$ <kbd>m4 --warn-macro-sequence</kbd>
+define(`foo', `$001 ${1} $1')
+error&rarr;m4:stdin:1: Warning: definition of `foo' contains sequence `$001'
+error&rarr;m4:stdin:1: Warning: definition of `foo' contains sequence `${1}'
+&rArr;
+foo(`bar')
+&rArr;bar ${1} bar
+</pre></div>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Pseudo-Arguments.html#Pseudo-Arguments" accesskey="n" rel="next">Pseudo Arguments</a>, Previous: <a href="Define.html#Define" accesskey="p" rel="prev">Define</a>, Up: <a href="Definitions.html#Definitions" accesskey="u" rel="up">Definitions</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>
